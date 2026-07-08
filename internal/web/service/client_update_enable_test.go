@@ -151,3 +151,70 @@ func TestResetTrafficByEmail_NoInbound_LeavesRecordEnableTrue(t *testing.T) {
 		t.Fatalf("%s: client_records.enable = false, want true (no-inbound reset re-enable gap)", email)
 	}
 }
+
+func TestUpdate_PersistsDirectionalSpeedLimits(t *testing.T) {
+	setupBulkDB(t)
+	svc := &ClientService{}
+	inboundSvc := &InboundService{}
+
+	email := "speed-update@x"
+	c := model.Client{Email: email, ID: "11111111-1111-1111-1111-111111111111", SubID: email, Enable: true}
+	ib := mkInbound(t, 53005, model.VLESS, clientsSettings(t, []model.Client{c}))
+	if err := svc.SyncInbound(nil, ib.Id, []model.Client{c}); err != nil {
+		t.Fatalf("seed linkage: %v", err)
+	}
+
+	rec, err := svc.GetRecordByEmail(nil, email)
+	if err != nil {
+		t.Fatalf("GetRecordByEmail: %v", err)
+	}
+	updated := rec.ToClient()
+	updated.UpSpeedLimit = 5 * 1024 * 1024
+	updated.DownSpeedLimit = 10 * 1024 * 1024
+	if _, err := svc.Update(inboundSvc, rec.Id, *updated); err != nil {
+		t.Fatalf("Update set speed: %v", err)
+	}
+	assertSpeedLimits(t, svc, inboundSvc, ib.Id, email, updated.UpSpeedLimit, updated.DownSpeedLimit)
+
+	updated.UpSpeedLimit = 0
+	updated.DownSpeedLimit = 0
+	updated.SpeedLimit = 0
+	if _, err := svc.Update(inboundSvc, rec.Id, *updated); err != nil {
+		t.Fatalf("Update clear speed: %v", err)
+	}
+	assertSpeedLimits(t, svc, inboundSvc, ib.Id, email, 0, 0)
+}
+
+func assertSpeedLimits(t *testing.T, svc *ClientService, inboundSvc *InboundService, inboundId int, email string, wantUp, wantDown uint64) {
+	t.Helper()
+	rec, err := svc.GetRecordByEmail(nil, email)
+	if err != nil {
+		t.Fatalf("GetRecordByEmail(%q): %v", email, err)
+	}
+	if rec.UpSpeedLimit != wantUp || rec.DownSpeedLimit != wantDown || rec.SpeedLimit != wantDown {
+		t.Fatalf("record speed limits up=%d down=%d legacy=%d, want up=%d down=%d", rec.UpSpeedLimit, rec.DownSpeedLimit, rec.SpeedLimit, wantUp, wantDown)
+	}
+	c := jsonClientByEmail(t, inboundSvc, inboundId, email)
+	if c.UpSpeedLimit != wantUp || c.DownSpeedLimit != wantDown || c.SpeedLimit != wantDown {
+		t.Fatalf("inbound JSON speed limits up=%d down=%d legacy=%d, want up=%d down=%d", c.UpSpeedLimit, c.DownSpeedLimit, c.SpeedLimit, wantUp, wantDown)
+	}
+}
+
+func jsonClientByEmail(t *testing.T, inboundSvc *InboundService, inboundId int, email string) model.Client {
+	t.Helper()
+	ib, err := inboundSvc.GetInbound(inboundId)
+	if err != nil {
+		t.Fatalf("GetInbound(%d): %v", inboundId, err)
+	}
+	clients, err := inboundSvc.GetClients(ib)
+	if err != nil {
+		t.Fatalf("GetClients(%d): %v", inboundId, err)
+	}
+	for _, c := range clients {
+		if c.Email == email {
+			return c
+		}
+	}
+	t.Fatalf("client %q not found in inbound %d settings JSON", email, inboundId)
+	return model.Client{}
+}

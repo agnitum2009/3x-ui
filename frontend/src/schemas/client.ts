@@ -25,6 +25,8 @@ export const ClientRecordSchema = z.object({
   expiryTime: z.number().optional(),
   limitIp: z.number().optional(),
   speedLimit: z.number().min(0).optional(),
+  upSpeedLimit: z.number().min(0).optional(),
+  downSpeedLimit: z.number().min(0).optional(),
   tgId: z.union([z.number(), z.string()]).optional(),
   group: z.string().optional(),
   comment: z.string().optional(),
@@ -199,7 +201,11 @@ export const ClientFormSchema = z.object({
   delayedDays: z.number().int().min(0),
   reset: z.number().int().min(0),
   limitIp: z.number().int().min(0),
-  speedLimit: z.number()
+  upSpeedLimit: z.number()
+    .min(0, 'pages.clients.speedLimitInvalid')
+    .max(1000, 'pages.clients.speedLimitInvalid')
+    .refine((v) => Math.abs(v * 10 - Math.round(v * 10)) < Number.EPSILON * 10, 'pages.clients.speedLimitInvalid'),
+  downSpeedLimit: z.number()
     .min(0, 'pages.clients.speedLimitInvalid')
     .max(1000, 'pages.clients.speedLimitInvalid')
     .refine((v) => Math.abs(v * 10 - Math.round(v * 10)) < Number.EPSILON * 10, 'pages.clients.speedLimitInvalid'),

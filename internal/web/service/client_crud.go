@@ -395,6 +395,9 @@ func (s *ClientService) Update(inboundSvc *InboundService, id int, updated model
 		if err := s.fillProtocolDefaults(&updated, inbound); err != nil {
 			return needRestart, err
 		}
+		if updated.SpeedLimit == 0 {
+			updated.SpeedLimit = updated.DownSpeedLimit
+		}
 		settingsPayload, mErr := json.Marshal(map[string][]model.Client{"clients": {clientWithInboundFlow(updated, inbound)}})
 		if mErr != nil {
 			return needRestart, mErr
@@ -447,6 +450,23 @@ func (s *ClientService) Update(inboundSvc *InboundService, id int, updated model
 	if err := database.GetDB().Model(&model.ClientRecord{}).
 		Where("id = ?", id).
 		UpdateColumn("enable", updated.Enable).Error; err != nil {
+		return needRestart, err
+	}
+
+	// Keep the list/API projection in sync with the inbound settings JSON. The
+	// clients table reads these columns directly, and 0 is a real value meaning
+	// unlimited, so UpdateColumns is required here.
+	downSpeedLimit := updated.DownSpeedLimit
+	if downSpeedLimit == 0 {
+		downSpeedLimit = updated.SpeedLimit
+	}
+	if err := database.GetDB().Model(&model.ClientRecord{}).
+		Where("id = ?", id).
+		UpdateColumns(map[string]any{
+			"speed_limit":      downSpeedLimit,
+			"up_speed_limit":   updated.UpSpeedLimit,
+			"down_speed_limit": downSpeedLimit,
+		}).Error; err != nil {
 		return needRestart, err
 	}
 

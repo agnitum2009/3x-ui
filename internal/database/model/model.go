@@ -686,62 +686,66 @@ type ClientReverse struct {
 
 // Client represents a client configuration for Xray inbounds with traffic limits and settings.
 type Client struct {
-	ID           string         `json:"id,omitempty"`       // Unique client identifier
-	Security     string         `json:"security"`           // Security method (e.g., "auto", "aes-128-gcm")
-	Password     string         `json:"password,omitempty"` // Client password
-	Flow         string         `json:"flow,omitempty"`     // Flow control (XTLS)
-	Reverse      *ClientReverse `json:"reverse,omitempty"`  // VLESS simple reverse proxy settings
-	Auth         string         `json:"auth,omitempty"`     // Auth password (Hysteria)
-	PrivateKey   string         `json:"privateKey,omitempty"`
-	PublicKey    string         `json:"publicKey,omitempty"`
-	AllowedIPs   []string       `json:"allowedIPs,omitempty"`
-	PreSharedKey string         `json:"preSharedKey,omitempty"`
-	KeepAlive    int            `json:"keepAlive,omitempty"`
-	Secret       string         `json:"secret,omitempty" example:"ee1234567890abcdef1234567890abcd7777772e636c6f7564666c6172652e636f6d"`
-	AdTag        string         `json:"adTag,omitempty" example:"0123456789abcdef0123456789abcdef"`
-	Email        string         `json:"email"`                        // Client email identifier
-	LimitIP      int            `json:"limitIp"`                      // IP limit for this client
-	SpeedLimit   uint64         `json:"speedLimit" form:"speedLimit"` // Per-client speed limit in bytes/s; 0 means unlimited
-	TotalGB      int64          `json:"totalGB" form:"totalGB"`       // Total traffic limit in GB
-	ExpiryTime   int64          `json:"expiryTime" form:"expiryTime"` // Expiration timestamp
-	Enable       bool           `json:"enable" form:"enable"`         // Whether the client is enabled
-	TgID         int64          `json:"tgId" form:"tgId"`             // Telegram user ID for notifications
-	SubID        string         `json:"subId" form:"subId"`           // Subscription identifier
-	Group        string         `json:"group,omitempty" form:"group"` // Logical grouping label
-	Comment      string         `json:"comment" form:"comment"`       // Client comment
-	Reset        int            `json:"reset" form:"reset"`           // Reset period in days
-	CreatedAt    int64          `json:"created_at,omitempty"`         // Creation timestamp
-	UpdatedAt    int64          `json:"updated_at,omitempty"`         // Last update timestamp
+	ID             string         `json:"id,omitempty"`       // Unique client identifier
+	Security       string         `json:"security"`           // Security method (e.g., "auto", "aes-128-gcm")
+	Password       string         `json:"password,omitempty"` // Client password
+	Flow           string         `json:"flow,omitempty"`     // Flow control (XTLS)
+	Reverse        *ClientReverse `json:"reverse,omitempty"`  // VLESS simple reverse proxy settings
+	Auth           string         `json:"auth,omitempty"`     // Auth password (Hysteria)
+	PrivateKey     string         `json:"privateKey,omitempty"`
+	PublicKey      string         `json:"publicKey,omitempty"`
+	AllowedIPs     []string       `json:"allowedIPs,omitempty"`
+	PreSharedKey   string         `json:"preSharedKey,omitempty"`
+	KeepAlive      int            `json:"keepAlive,omitempty"`
+	Secret         string         `json:"secret,omitempty" example:"ee1234567890abcdef1234567890abcd7777772e636c6f7564666c6172652e636f6d"`
+	AdTag          string         `json:"adTag,omitempty" example:"0123456789abcdef0123456789abcdef"`
+	Email          string         `json:"email"`                                // Client email identifier
+	LimitIP        int            `json:"limitIp"`                              // IP limit for this client
+	SpeedLimit     uint64         `json:"speedLimit" form:"speedLimit"`         // Legacy per-client speed limit in bytes/s; treated as downlink when directional fields are absent
+	UpSpeedLimit   uint64         `json:"upSpeedLimit" form:"upSpeedLimit"`     // Client upload / server inbound limit in bytes/s; 0 means unlimited
+	DownSpeedLimit uint64         `json:"downSpeedLimit" form:"downSpeedLimit"` // Client download / server outbound limit in bytes/s; 0 means unlimited
+	TotalGB        int64          `json:"totalGB" form:"totalGB"`               // Total traffic limit in GB
+	ExpiryTime     int64          `json:"expiryTime" form:"expiryTime"`         // Expiration timestamp
+	Enable         bool           `json:"enable" form:"enable"`                 // Whether the client is enabled
+	TgID           int64          `json:"tgId" form:"tgId"`                     // Telegram user ID for notifications
+	SubID          string         `json:"subId" form:"subId"`                   // Subscription identifier
+	Group          string         `json:"group,omitempty" form:"group"`         // Logical grouping label
+	Comment        string         `json:"comment" form:"comment"`               // Client comment
+	Reset          int            `json:"reset" form:"reset"`                   // Reset period in days
+	CreatedAt      int64          `json:"created_at,omitempty"`                 // Creation timestamp
+	UpdatedAt      int64          `json:"updated_at,omitempty"`                 // Last update timestamp
 }
 
 type ClientRecord struct {
-	Id           int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	Email        string `json:"email" gorm:"uniqueIndex;not null"`
-	SubID        string `json:"subId" gorm:"index;column:sub_id"`
-	UUID         string `json:"uuid" gorm:"column:uuid"`
-	Password     string `json:"password"`
-	Auth         string `json:"auth"`
-	Flow         string `json:"flow"`
-	Security     string `json:"security"`
-	Reverse      string `json:"reverse" gorm:"column:reverse"`
-	PrivateKey   string `json:"privateKey" gorm:"column:wg_private_key"`
-	PublicKey    string `json:"publicKey" gorm:"column:wg_public_key"`
-	AllowedIPs   string `json:"allowedIPs" gorm:"column:wg_allowed_ips"`
-	PreSharedKey string `json:"preSharedKey" gorm:"column:wg_pre_shared_key"`
-	KeepAlive    int    `json:"keepAlive" gorm:"column:wg_keep_alive;default:0"`
-	Secret       string `json:"secret" gorm:"column:secret"`
-	AdTag        string `json:"adTag" gorm:"column:ad_tag;default:''"`
-	LimitIP      int    `json:"limitIp" gorm:"column:limit_ip"`
-	SpeedLimit   uint64 `json:"speedLimit" gorm:"column:speed_limit;default:0"`
-	TotalGB      int64  `json:"totalGB" gorm:"column:total_gb"`
-	ExpiryTime   int64  `json:"expiryTime" gorm:"column:expiry_time"`
-	Enable       bool   `json:"enable" gorm:"default:true"`
-	TgID         int64  `json:"tgId" gorm:"column:tg_id"`
-	Group        string `json:"group" gorm:"column:group_name;default:'';index:idx_client_record_group"`
-	Comment      string `json:"comment"`
-	Reset        int    `json:"reset" gorm:"default:0"`
-	CreatedAt    int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
-	UpdatedAt    int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+	Id             int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	Email          string `json:"email" gorm:"uniqueIndex;not null"`
+	SubID          string `json:"subId" gorm:"index;column:sub_id"`
+	UUID           string `json:"uuid" gorm:"column:uuid"`
+	Password       string `json:"password"`
+	Auth           string `json:"auth"`
+	Flow           string `json:"flow"`
+	Security       string `json:"security"`
+	Reverse        string `json:"reverse" gorm:"column:reverse"`
+	PrivateKey     string `json:"privateKey" gorm:"column:wg_private_key"`
+	PublicKey      string `json:"publicKey" gorm:"column:wg_public_key"`
+	AllowedIPs     string `json:"allowedIPs" gorm:"column:wg_allowed_ips"`
+	PreSharedKey   string `json:"preSharedKey" gorm:"column:wg_pre_shared_key"`
+	KeepAlive      int    `json:"keepAlive" gorm:"column:wg_keep_alive;default:0"`
+	Secret         string `json:"secret" gorm:"column:secret"`
+	AdTag          string `json:"adTag" gorm:"column:ad_tag;default:''"`
+	LimitIP        int    `json:"limitIp" gorm:"column:limit_ip"`
+	SpeedLimit     uint64 `json:"speedLimit" gorm:"column:speed_limit;default:0"`
+	UpSpeedLimit   uint64 `json:"upSpeedLimit" gorm:"column:up_speed_limit;default:0"`
+	DownSpeedLimit uint64 `json:"downSpeedLimit" gorm:"column:down_speed_limit;default:0"`
+	TotalGB        int64  `json:"totalGB" gorm:"column:total_gb"`
+	ExpiryTime     int64  `json:"expiryTime" gorm:"column:expiry_time"`
+	Enable         bool   `json:"enable" gorm:"default:true"`
+	TgID           int64  `json:"tgId" gorm:"column:tg_id"`
+	Group          string `json:"group" gorm:"column:group_name;default:'';index:idx_client_record_group"`
+	Comment        string `json:"comment"`
+	Reset          int    `json:"reset" gorm:"default:0"`
+	CreatedAt      int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt      int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
 }
 
 func (ClientRecord) TableName() string { return "clients" }
@@ -891,25 +895,31 @@ type Host struct {
 func (Host) TableName() string { return "hosts" }
 
 func (c *Client) ToRecord() *ClientRecord {
+	downSpeedLimit := c.DownSpeedLimit
+	if downSpeedLimit == 0 {
+		downSpeedLimit = c.SpeedLimit
+	}
 	rec := &ClientRecord{
-		Email:      c.Email,
-		SubID:      c.SubID,
-		UUID:       c.ID,
-		Password:   c.Password,
-		Auth:       c.Auth,
-		Flow:       c.Flow,
-		Security:   c.Security,
-		LimitIP:    c.LimitIP,
-		SpeedLimit: c.SpeedLimit,
-		TotalGB:    c.TotalGB,
-		ExpiryTime: c.ExpiryTime,
-		Enable:     c.Enable,
-		TgID:       c.TgID,
-		Group:      c.Group,
-		Comment:    c.Comment,
-		Reset:      c.Reset,
-		CreatedAt:  c.CreatedAt,
-		UpdatedAt:  c.UpdatedAt,
+		Email:          c.Email,
+		SubID:          c.SubID,
+		UUID:           c.ID,
+		Password:       c.Password,
+		Auth:           c.Auth,
+		Flow:           c.Flow,
+		Security:       c.Security,
+		LimitIP:        c.LimitIP,
+		SpeedLimit:     downSpeedLimit,
+		UpSpeedLimit:   c.UpSpeedLimit,
+		DownSpeedLimit: downSpeedLimit,
+		TotalGB:        c.TotalGB,
+		ExpiryTime:     c.ExpiryTime,
+		Enable:         c.Enable,
+		TgID:           c.TgID,
+		Group:          c.Group,
+		Comment:        c.Comment,
+		Reset:          c.Reset,
+		CreatedAt:      c.CreatedAt,
+		UpdatedAt:      c.UpdatedAt,
 
 		PrivateKey:   c.PrivateKey,
 		PublicKey:    c.PublicKey,
@@ -945,25 +955,31 @@ func splitWireguardAllowedIPs(csv string) []string {
 }
 
 func (r *ClientRecord) ToClient() *Client {
+	downSpeedLimit := r.DownSpeedLimit
+	if downSpeedLimit == 0 {
+		downSpeedLimit = r.SpeedLimit
+	}
 	c := &Client{
-		ID:         r.UUID,
-		Email:      r.Email,
-		SubID:      r.SubID,
-		Password:   r.Password,
-		Auth:       r.Auth,
-		Flow:       r.Flow,
-		Security:   r.Security,
-		LimitIP:    r.LimitIP,
-		SpeedLimit: r.SpeedLimit,
-		TotalGB:    r.TotalGB,
-		ExpiryTime: r.ExpiryTime,
-		Enable:     r.Enable,
-		TgID:       r.TgID,
-		Group:      r.Group,
-		Comment:    r.Comment,
-		Reset:      r.Reset,
-		CreatedAt:  r.CreatedAt,
-		UpdatedAt:  r.UpdatedAt,
+		ID:             r.UUID,
+		Email:          r.Email,
+		SubID:          r.SubID,
+		Password:       r.Password,
+		Auth:           r.Auth,
+		Flow:           r.Flow,
+		Security:       r.Security,
+		LimitIP:        r.LimitIP,
+		SpeedLimit:     downSpeedLimit,
+		UpSpeedLimit:   r.UpSpeedLimit,
+		DownSpeedLimit: downSpeedLimit,
+		TotalGB:        r.TotalGB,
+		ExpiryTime:     r.ExpiryTime,
+		Enable:         r.Enable,
+		TgID:           r.TgID,
+		Group:          r.Group,
+		Comment:        r.Comment,
+		Reset:          r.Reset,
+		CreatedAt:      r.CreatedAt,
+		UpdatedAt:      r.UpdatedAt,
 
 		PrivateKey:   r.PrivateKey,
 		PublicKey:    r.PublicKey,
@@ -1094,6 +1110,27 @@ func MergeClientRecord(existing *ClientRecord, incoming *ClientRecord) []ClientM
 		}
 		if picked != existing.SpeedLimit {
 			keep("speedLimit", existing.SpeedLimit, incoming.SpeedLimit, picked)
+			existing.SpeedLimit = picked
+		}
+	}
+	if existing.UpSpeedLimit != incoming.UpSpeedLimit && incoming.UpSpeedLimit != 0 {
+		picked := existing.UpSpeedLimit
+		if existing.UpSpeedLimit == 0 || incoming.UpSpeedLimit > existing.UpSpeedLimit {
+			picked = incoming.UpSpeedLimit
+		}
+		if picked != existing.UpSpeedLimit {
+			keep("upSpeedLimit", existing.UpSpeedLimit, incoming.UpSpeedLimit, picked)
+			existing.UpSpeedLimit = picked
+		}
+	}
+	if existing.DownSpeedLimit != incoming.DownSpeedLimit && incoming.DownSpeedLimit != 0 {
+		picked := existing.DownSpeedLimit
+		if existing.DownSpeedLimit == 0 || incoming.DownSpeedLimit > existing.DownSpeedLimit {
+			picked = incoming.DownSpeedLimit
+		}
+		if picked != existing.DownSpeedLimit {
+			keep("downSpeedLimit", existing.DownSpeedLimit, incoming.DownSpeedLimit, picked)
+			existing.DownSpeedLimit = picked
 			existing.SpeedLimit = picked
 		}
 	}

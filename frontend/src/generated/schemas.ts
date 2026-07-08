@@ -1088,6 +1088,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Creation timestamp",
         "type": "integer"
       },
+      "downSpeedLimit": {
+        "description": "Client download / server outbound limit in bytes/s; 0 means unlimited",
+        "type": "integer"
+      },
       "email": {
         "description": "Client email identifier",
         "type": "string"
@@ -1154,7 +1158,7 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "speedLimit": {
-        "description": "Per-client speed limit in bytes/s; 0 means unlimited",
+        "description": "Legacy per-client speed limit in bytes/s; treated as downlink when directional fields are absent",
         "type": "integer"
       },
       "subId": {
@@ -1169,6 +1173,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Total traffic limit in GB",
         "type": "integer"
       },
+      "upSpeedLimit": {
+        "description": "Client upload / server inbound limit in bytes/s; 0 means unlimited",
+        "type": "integer"
+      },
       "updated_at": {
         "description": "Last update timestamp",
         "type": "integer"
@@ -1176,6 +1184,7 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "comment",
+      "downSpeedLimit",
       "email",
       "enable",
       "expiryTime",
@@ -1185,7 +1194,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "speedLimit",
       "subId",
       "tgId",
-      "totalGB"
+      "totalGB",
+      "upSpeedLimit"
     ],
     "type": "object"
   },
@@ -1227,6 +1237,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "createdAt": {
+        "type": "integer"
+      },
+      "downSpeedLimit": {
         "type": "integer"
       },
       "email": {
@@ -1287,6 +1300,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "totalGB": {
         "type": "integer"
       },
+      "upSpeedLimit": {
+        "type": "integer"
+      },
       "updatedAt": {
         "type": "integer"
       },
@@ -1300,6 +1316,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "auth",
       "comment",
       "createdAt",
+      "downSpeedLimit",
       "email",
       "enable",
       "expiryTime",
@@ -1320,6 +1337,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "subId",
       "tgId",
       "totalGB",
+      "upSpeedLimit",
       "updatedAt",
       "uuid"
     ],

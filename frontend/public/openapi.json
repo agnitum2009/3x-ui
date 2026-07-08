@@ -1114,6 +1114,10 @@
             "description": "Creation timestamp",
             "type": "integer"
           },
+          "downSpeedLimit": {
+            "description": "Client download / server outbound limit in bytes/s; 0 means unlimited",
+            "type": "integer"
+          },
           "email": {
             "description": "Client email identifier",
             "type": "string"
@@ -1180,7 +1184,7 @@
             "type": "string"
           },
           "speedLimit": {
-            "description": "Per-client speed limit in bytes/s; 0 means unlimited",
+            "description": "Legacy per-client speed limit in bytes/s; treated as downlink when directional fields are absent",
             "type": "integer"
           },
           "subId": {
@@ -1195,6 +1199,10 @@
             "description": "Total traffic limit in GB",
             "type": "integer"
           },
+          "upSpeedLimit": {
+            "description": "Client upload / server inbound limit in bytes/s; 0 means unlimited",
+            "type": "integer"
+          },
           "updated_at": {
             "description": "Last update timestamp",
             "type": "integer"
@@ -1202,6 +1210,7 @@
         },
         "required": [
           "comment",
+          "downSpeedLimit",
           "email",
           "enable",
           "expiryTime",
@@ -1211,7 +1220,8 @@
           "speedLimit",
           "subId",
           "tgId",
-          "totalGB"
+          "totalGB",
+          "upSpeedLimit"
         ],
         "type": "object"
       },
@@ -1253,6 +1263,9 @@
             "type": "string"
           },
           "createdAt": {
+            "type": "integer"
+          },
+          "downSpeedLimit": {
             "type": "integer"
           },
           "email": {
@@ -1313,6 +1326,9 @@
           "totalGB": {
             "type": "integer"
           },
+          "upSpeedLimit": {
+            "type": "integer"
+          },
           "updatedAt": {
             "type": "integer"
           },
@@ -1326,6 +1342,7 @@
           "auth",
           "comment",
           "createdAt",
+          "downSpeedLimit",
           "email",
           "enable",
           "expiryTime",
@@ -1346,6 +1363,7 @@
           "subId",
           "tgId",
           "totalGB",
+          "upSpeedLimit",
           "updatedAt",
           "uuid"
         ],

@@ -23,7 +23,7 @@ Use this production shape instead:
 - Xray-core fork owns enforcement.
 - 3x-ui fork owns UI, persistence, API payloads, config generation, and packaged binary selection.
 - `limitIp` can be reused as `deviceLimit`.
-- Add one new client field, `speedLimit`, for bytes per second.
+- Add two client fields, `upSpeedLimit` and `downSpeedLimit`, in bytes per second. Keep legacy `speedLimit` as a downlink compatibility alias.
 - Preserve protobuf compatibility by appending fields instead of renumbering existing fields.
 
 ## Source evidence
@@ -65,7 +65,7 @@ In current Xray-core, that is around dispatcher link wrapping / writers, not in 
 The minimum control plane is one numeric value per client:
 
 ```text
-speedLimit: bytes per second, 0 = unlimited
+upSpeedLimit/downSpeedLimit: bytes per second, 0 = unlimited
 ```
 
 3x-ui must persist and send this value. Xray-core must enforce it.
@@ -103,10 +103,10 @@ Rules:
 
 Required:
 
-- VMess clients read `speedLimit` and `limitIp`/`deviceLimit` from JSON.
-- VLESS clients read `speedLimit` and `limitIp`/`deviceLimit` from JSON.
-- Trojan clients read `speedLimit` and `limitIp`/`deviceLimit` from JSON.
-- Shadowsocks clients read `speedLimit` and `limitIp`/`deviceLimit` from JSON.
+- VMess clients read `upSpeedLimit`, `downSpeedLimit` and `limitIp`/`deviceLimit` from JSON.
+- VLESS clients read `upSpeedLimit`, `downSpeedLimit` and `limitIp`/`deviceLimit` from JSON.
+- Trojan clients read `upSpeedLimit`, `downSpeedLimit` and `limitIp`/`deviceLimit` from JSON.
+- Shadowsocks clients read `upSpeedLimit`, `downSpeedLimit` and `limitIp`/`deviceLimit` from JSON.
 - Hysteria2 and WireGuard support should be explicit: either supported and tested, or documented as unsupported in first release.
 
 Reason: 3x-ui rebuilds full Xray config on restart; runtime gRPC support alone is insufficient.
@@ -143,7 +143,7 @@ Non-goals for first version:
 Required:
 
 - Add `speed_limit` column to `clients`.
-- Add `SpeedLimit uint64` / `speedLimit` to:
+- Add `UpSpeedLimit uint64` / `upSpeedLimit` and `DownSpeedLimit uint64` / `downSpeedLimit` to:
   - `model.Client`;
   - `model.ClientRecord`;
   - conversion methods `ToRecord` and `ToClient`;
@@ -158,7 +158,7 @@ Required:
 Required:
 
 - On `/panel/clients`, display Speed Limit immediately after Traffic.
-- Edit client modal includes speedLimit input near traffic quota and IP limit.
+- Edit client modal includes separate upload/download speed limit inputs near traffic quota and IP limit.
 - Use `0 = unlimited` copy.
 - Prefer human display units, but persist bytes/s.
 
@@ -191,11 +191,11 @@ Minimum checks before calling the feature done:
 - Xray-core unit test: `protocol.User` preserves speed/device fields.
 - Xray-core unit test: limiter delays writes and does not error on large buffer with low limit.
 - Xray-core unit test: device limit releases IP on connection close.
-- 3x-ui backend test: client create/update persists `speedLimit`.
-- 3x-ui backend test: generated Xray config contains `speedLimit`.
+- 3x-ui backend test: client create/update persists `upSpeedLimit` and `downSpeedLimit`.
+- 3x-ui backend test: generated Xray config contains `upSpeedLimit` and `downSpeedLimit`.
 - 3x-ui backend test: gRPC AddUser populates `protocol.User.SpeedLimit`.
-- Frontend test/schema check: client form accepts speedLimit and list rows display it.
-- Manual e2e: create a client with low speedLimit, connect through deployed patched stack, measure throughput below limit.
+- Frontend test/schema check: client form accepts upload/download limits and list rows display both.
+- Manual e2e: create a client with low upload/download speed limits, connect through deployed patched stack, measure throughput below limit.
 
 ## Ontology review
 
@@ -221,7 +221,7 @@ Minimum checks before calling the feature done:
 
 ### Invariants
 
-- `speedLimit = 0` means no limiter is attached.
+- `upSpeedLimit = 0` and `downSpeedLimit = 0` mean no limiter is attached for that direction.
 - `deviceLimit = 0` means no device/IP rejection.
 - Protobuf field numbers 1, 2, 3 remain unchanged.
 - Static config and runtime API must carry equivalent semantics.
@@ -250,7 +250,7 @@ Minimum checks before calling the feature done:
 
 ### Phase 0: freeze semantics
 
-- `speedLimit` unit: bytes/s.
+- `upSpeedLimit` and `downSpeedLimit` unit: bytes/s.
 - UI display: human readable.
 - Enforcement: per direction.
 - `limitIp` maps to core `device_limit`.
@@ -284,7 +284,7 @@ Proceed, but treat this as a coordinated fork feature, not a small panel change.
 
 The lazy correct implementation is:
 
-1. one new panel field: `speedLimit`;
+1. two panel fields: `upSpeedLimit` and `downSpeedLimit`;
 2. reuse `limitIp` for device limit;
 3. one Xray-core enforcement point in dispatcher;
 4. one packaging switch to the patched Xray binary;

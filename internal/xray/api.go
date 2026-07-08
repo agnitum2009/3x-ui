@@ -644,6 +644,17 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 	if err != nil {
 		return err
 	}
+	upSpeedLimit, err := getOptionalUserUint64(user, "upSpeedLimit")
+	if err != nil {
+		return err
+	}
+	downSpeedLimit, err := getOptionalUserUint64(user, "downSpeedLimit")
+	if err != nil {
+		return err
+	}
+	if downSpeedLimit == 0 {
+		downSpeedLimit = speedLimit
+	}
 	deviceLimit64, err := getOptionalUserUint64(user, "deviceLimit")
 	if err != nil {
 		return err
@@ -669,10 +680,12 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 		Tag: inboundTag,
 		Operation: serial.ToTypedMessage(&command.AddUserOperation{
 			User: &protocol.User{
-				Email:       userEmail,
-				Account:     account,
-				SpeedLimit:  speedLimit,
-				DeviceLimit: uint32(deviceLimit64),
+				Email:          userEmail,
+				Account:        account,
+				SpeedLimit:     downSpeedLimit,
+				UpSpeedLimit:   upSpeedLimit,
+				DownSpeedLimit: downSpeedLimit,
+				DeviceLimit:    uint32(deviceLimit64),
 			},
 		}),
 	})

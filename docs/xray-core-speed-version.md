@@ -28,8 +28,8 @@ Rollback:
 
 E2E proof still required on a deployed node:
 
-1. create/edit a client with `speedLimit > 0`;
+1. create/edit a client with `upSpeedLimit > 0` and/or `downSpeedLimit > 0`;
 2. connect through that client;
 3. measure sustained throughput below the configured bytes/s ceiling;
-4. set `speedLimit = 0`, restart/reload the client, and verify throttling is
+4. set both speed limits to `0`, restart/reload the client, and verify throttling is
    removed.

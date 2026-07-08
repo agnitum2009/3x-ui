@@ -245,6 +245,7 @@ export const ClientSchema = z.object({
   auth: z.string().optional(),
   comment: z.string(),
   created_at: z.number().int().optional(),
+  downSpeedLimit: z.number().int(),
   email: z.string(),
   enable: z.boolean(),
   expiryTime: z.number().int(),
@@ -265,6 +266,7 @@ export const ClientSchema = z.object({
   subId: z.string(),
   tgId: z.number().int(),
   totalGB: z.number().int(),
+  upSpeedLimit: z.number().int(),
   updated_at: z.number().int().optional(),
 });
 export type Client = z.infer<typeof ClientSchema>;
@@ -283,6 +285,7 @@ export const ClientRecordSchema = z.object({
   auth: z.string(),
   comment: z.string(),
   createdAt: z.number().int(),
+  downSpeedLimit: z.number().int(),
   email: z.string(),
   enable: z.boolean(),
   expiryTime: z.number().int(),
@@ -303,6 +306,7 @@ export const ClientRecordSchema = z.object({
   subId: z.string(),
   tgId: z.number().int(),
   totalGB: z.number().int(),
+  upSpeedLimit: z.number().int(),
   updatedAt: z.number().int(),
   uuid: z.string(),
 });

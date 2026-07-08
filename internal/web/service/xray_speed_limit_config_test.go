@@ -30,7 +30,7 @@ func emittedInboundSettings(t *testing.T, tag string) map[string]any {
 	return nil
 }
 
-func TestGetXrayConfigEmitsSpeedAndDeviceLimit(t *testing.T) {
+func TestGetXrayConfigEmitsDirectionalSpeedAndDeviceLimit(t *testing.T) {
 	setupSettingTestDB(t)
 	in := &model.Inbound{
 		Tag:      "vless-speed",
@@ -38,22 +38,24 @@ func TestGetXrayConfigEmitsSpeedAndDeviceLimit(t *testing.T) {
 		Port:     42345,
 		Protocol: model.VLESS,
 		Settings: clientsSettings(t, []model.Client{{
-			ID:         "11111111-1111-1111-1111-111111111111",
-			Email:      "speed@vless.test",
-			Enable:     true,
-			LimitIP:    3,
-			SpeedLimit: 1048576,
+			ID:             "11111111-1111-1111-1111-111111111111",
+			Email:          "speed@vless.test",
+			Enable:         true,
+			LimitIP:        3,
+			UpSpeedLimit:   524288,
+			DownSpeedLimit: 1048576,
 		}}),
 	}
 	if err := database.GetDB().Create(in).Error; err != nil {
 		t.Fatalf("create inbound: %v", err)
 	}
 	if err := (&ClientService{}).SyncInbound(nil, in.Id, []model.Client{{
-		ID:         "11111111-1111-1111-1111-111111111111",
-		Email:      "speed@vless.test",
-		Enable:     true,
-		LimitIP:    3,
-		SpeedLimit: 1048576,
+		ID:             "11111111-1111-1111-1111-111111111111",
+		Email:          "speed@vless.test",
+		Enable:         true,
+		LimitIP:        3,
+		UpSpeedLimit:   524288,
+		DownSpeedLimit: 1048576,
 	}}); err != nil {
 		t.Fatalf("SyncInbound: %v", err)
 	}
@@ -67,8 +69,14 @@ func TestGetXrayConfigEmitsSpeedAndDeviceLimit(t *testing.T) {
 	if !ok {
 		t.Fatalf("client is not an object: %T", rawClients[0])
 	}
+	if client["upSpeedLimit"] != float64(524288) {
+		t.Fatalf("upSpeedLimit = %v, want 524288", client["upSpeedLimit"])
+	}
+	if client["downSpeedLimit"] != float64(1048576) {
+		t.Fatalf("downSpeedLimit = %v, want 1048576", client["downSpeedLimit"])
+	}
 	if client["speedLimit"] != float64(1048576) {
-		t.Fatalf("speedLimit = %v, want 1048576", client["speedLimit"])
+		t.Fatalf("legacy speedLimit = %v, want 1048576", client["speedLimit"])
 	}
 	if client["deviceLimit"] != float64(3) {
 		t.Fatalf("deviceLimit = %v, want 3", client["deviceLimit"])

@@ -798,8 +798,8 @@
       "actions": "Aksi",
       "totalGB": "Batas Trafik (GB)",
       "totalGBDesc": "Kuota data untuk klien ini. 0 = tidak terbatas.",
-      "speedLimit": "Downlink Speed Limit (MB/s)",
-      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
+      "speedLimit": "Speed Limit (MB/s)",
+      "speedLimitDesc": "Legacy single speed limit field; use upload/download limits in the current UI.",
       "expiryTime": "Kedaluwarsa",
       "addClients": "Tambah klien",
       "limitIp": "Batas IP",
@@ -950,7 +950,13 @@
         "imported": "{count} klien diimpor",
         "importedMixed": "{ok} diimpor, {failed} dilewati"
       },
-      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place.",
+      "upSpeedLimit": "Upload Limit (MB/s)",
+      "upSpeedLimitDesc": "Client upload / server inbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
+      "downSpeedLimit": "Download Limit (MB/s)",
+      "downSpeedLimitDesc": "Client download / server outbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
+      "upSpeedLimitShort": "Up",
+      "downSpeedLimitShort": "Down"
     },
     "groups": {
       "title": "Grup",

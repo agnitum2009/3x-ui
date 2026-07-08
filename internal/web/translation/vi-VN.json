@@ -798,8 +798,8 @@
       "actions": "Hành động",
       "totalGB": "Giới hạn lưu lượng (GB)",
       "totalGBDesc": "Hạn mức dữ liệu cho khách hàng này. 0 = không giới hạn.",
-      "speedLimit": "Downlink Speed Limit (MB/s)",
-      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
+      "speedLimit": "Speed Limit (MB/s)",
+      "speedLimitDesc": "Legacy single speed limit field; use upload/download limits in the current UI.",
       "expiryTime": "Hết hạn",
       "addClients": "Thêm khách hàng",
       "limitIp": "Giới hạn IP",
@@ -950,7 +950,13 @@
         "imported": "Đã nhập {count} khách hàng",
         "importedMixed": "Đã nhập {ok}, bỏ qua {failed}"
       },
-      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place.",
+      "upSpeedLimit": "Upload Limit (MB/s)",
+      "upSpeedLimitDesc": "Client upload / server inbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
+      "downSpeedLimit": "Download Limit (MB/s)",
+      "downSpeedLimitDesc": "Client download / server outbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
+      "upSpeedLimitShort": "Up",
+      "downSpeedLimitShort": "Down"
     },
     "groups": {
       "title": "Nhóm",

@@ -172,7 +172,14 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 				flow = "xtls-rprx-vision"
 			}
 			entry := map[string]any{"email": c.Email}
-			if c.SpeedLimit > 0 {
+			if c.UpSpeedLimit > 0 {
+				entry["upSpeedLimit"] = c.UpSpeedLimit
+			}
+			if c.DownSpeedLimit > 0 {
+				entry["downSpeedLimit"] = c.DownSpeedLimit
+				entry["speedLimit"] = c.DownSpeedLimit
+			} else if c.SpeedLimit > 0 {
+				entry["downSpeedLimit"] = c.SpeedLimit
 				entry["speedLimit"] = c.SpeedLimit
 			}
 			if c.LimitIP > 0 {
@@ -213,7 +220,14 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 				}
 			case model.WireGuard:
 				peer := map[string]any{"email": c.Email, "level": 0}
-				if c.SpeedLimit > 0 {
+				if c.UpSpeedLimit > 0 {
+					peer["upSpeedLimit"] = c.UpSpeedLimit
+				}
+				if c.DownSpeedLimit > 0 {
+					peer["downSpeedLimit"] = c.DownSpeedLimit
+					peer["speedLimit"] = c.DownSpeedLimit
+				} else if c.SpeedLimit > 0 {
+					peer["downSpeedLimit"] = c.SpeedLimit
 					peer["speedLimit"] = c.SpeedLimit
 				}
 				if c.LimitIP > 0 {

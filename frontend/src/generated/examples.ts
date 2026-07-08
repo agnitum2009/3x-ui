@@ -221,6 +221,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "auth": "",
     "comment": "",
     "created_at": 0,
+    "downSpeedLimit": 0,
     "email": "",
     "enable": false,
     "expiryTime": 0,
@@ -241,6 +242,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subId": "",
     "tgId": 0,
     "totalGB": 0,
+    "upSpeedLimit": 0,
     "updated_at": 0
   },
   "ClientInbound": {
@@ -255,6 +257,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "auth": "",
     "comment": "",
     "createdAt": 0,
+    "downSpeedLimit": 0,
     "email": "",
     "enable": false,
     "expiryTime": 0,
@@ -275,6 +278,7 @@ export const EXAMPLES: Record<string, unknown> = {
     "subId": "",
     "tgId": 0,
     "totalGB": 0,
+    "upSpeedLimit": 0,
     "updatedAt": 0,
     "uuid": ""
   },

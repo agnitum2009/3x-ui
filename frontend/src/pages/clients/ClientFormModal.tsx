@@ -108,7 +108,8 @@ interface FormState {
   delayedDays: number;
   reset: number;
   limitIp: number;
-  speedLimit: number;
+  upSpeedLimit: number;
+  downSpeedLimit: number;
   tgId: number;
   group: string;
   comment: string;
@@ -139,7 +140,8 @@ function emptyForm(): FormState {
     delayedDays: 0,
     reset: 0,
     limitIp: 0,
-    speedLimit: 0,
+    upSpeedLimit: 0,
+    downSpeedLimit: 0,
     tgId: 0,
     group: '',
     comment: '',
@@ -246,7 +248,8 @@ export default function ClientFormModal({
         totalGB: bytesToGB(client.totalGB || 0),
         reset: Number(client.reset) || 0,
         limitIp: client.limitIp || 0,
-        speedLimit: SizeFormatter.speedBytesToMBps(client.speedLimit || 0),
+        upSpeedLimit: SizeFormatter.speedBytesToMBps(client.upSpeedLimit || 0),
+        downSpeedLimit: SizeFormatter.speedBytesToMBps(client.downSpeedLimit || client.speedLimit || 0),
         tgId: Number(client.tgId) || 0,
         group: client.group || '',
         comment: client.comment || '',
@@ -492,7 +495,8 @@ export default function ClientFormModal({
       delayedDays: form.delayedDays,
       reset: form.reset,
       limitIp: form.limitIp,
-      speedLimit: form.speedLimit,
+      upSpeedLimit: form.upSpeedLimit,
+      downSpeedLimit: form.downSpeedLimit,
       tgId: form.tgId,
       group: form.group,
       comment: form.comment,
@@ -519,7 +523,9 @@ export default function ClientFormModal({
       expiryTime,
       reset: Number(form.reset) || 0,
       limitIp: Number(form.limitIp) || 0,
-      speedLimit: SizeFormatter.speedMBpsToBytes(form.speedLimit),
+      upSpeedLimit: SizeFormatter.speedMBpsToBytes(form.upSpeedLimit),
+      downSpeedLimit: SizeFormatter.speedMBpsToBytes(form.downSpeedLimit),
+      speedLimit: SizeFormatter.speedMBpsToBytes(form.downSpeedLimit),
       tgId: Number(form.tgId) || 0,
       group: form.group,
       comment: form.comment,
@@ -655,9 +661,15 @@ export default function ClientFormModal({
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={4}>
-                        <Form.Item label={t('pages.clients.speedLimit')} tooltip={t('pages.clients.speedLimitDesc')}>
-                          <InputNumber value={form.speedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
-                            onChange={(v) => update('speedLimit', Number(v) || 0)} />
+                        <Form.Item label={t('pages.clients.upSpeedLimit')} tooltip={t('pages.clients.upSpeedLimitDesc')}>
+                          <InputNumber value={form.upSpeedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
+                            onChange={(v) => update('upSpeedLimit', Number(v) || 0)} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={4}>
+                        <Form.Item label={t('pages.clients.downSpeedLimit')} tooltip={t('pages.clients.downSpeedLimitDesc')}>
+                          <InputNumber value={form.downSpeedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
+                            onChange={(v) => update('downSpeedLimit', Number(v) || 0)} />
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={4}>

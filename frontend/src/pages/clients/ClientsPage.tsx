@@ -86,20 +86,28 @@ const FILTER_STATE_KEY = 'clientsFilterState';
 const DISABLED_PAGE_SIZE = 200;
 
 function SpeedLimitCell({
-  limit,
+  upLimit,
+  downLimit,
+  legacyLimit,
   speed,
   t,
 }: {
-  limit?: number;
+  upLimit?: number;
+  downLimit?: number;
+  legacyLimit?: number;
   speed?: ClientSpeedEntry;
   t: (key: string) => string;
 }) {
-  const configured = Number(limit) || 0;
+  const up = Number(upLimit) || 0;
+  const down = Number(downLimit || legacyLimit) || 0;
   const hasLive = isActiveSpeed(speed);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-      <Tag color={configured > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
-        {t('pages.clients.speedLimitConfigured')}: {configured > 0 ? SizeFormatter.speedMBpsFormat(configured) : t('unlimited')}
+      <Tag color={up > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
+        {t('pages.clients.upSpeedLimitShort')}: {up > 0 ? SizeFormatter.speedMBpsFormat(up) : t('unlimited')}
+      </Tag>
+      <Tag color={down > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
+        {t('pages.clients.downSpeedLimitShort')}: {down > 0 ? SizeFormatter.speedMBpsFormat(down) : t('unlimited')}
       </Tag>
       {hasLive && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
@@ -936,7 +944,7 @@ export default function ClientsPage() {
       width: 180,
       align: 'center',
       render: (_v, record) => (
-        <SpeedLimitCell limit={record.speedLimit} speed={clientSpeed[record.email]} t={t} />
+        <SpeedLimitCell upLimit={record.upSpeedLimit} downLimit={record.downSpeedLimit} legacyLimit={record.speedLimit} speed={clientSpeed[record.email]} t={t} />
       ),
     },
     {
@@ -1466,7 +1474,7 @@ export default function ClientsPage() {
                                     trafficDiff={trafficDiff}
                                   />
                                   <div className="client-card-speed">
-                                    <SpeedLimitCell limit={row.speedLimit} speed={clientSpeed[row.email]} t={t} />
+                                    <SpeedLimitCell upLimit={row.upSpeedLimit} downLimit={row.downSpeedLimit} legacyLimit={row.speedLimit} speed={clientSpeed[row.email]} t={t} />
                                   </div>
                                 </div>
                               );

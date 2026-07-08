@@ -798,8 +798,8 @@
       "actions": "操作",
       "totalGB": "トラフィック上限 (GB)",
       "totalGBDesc": "このクライアントのデータ割当量。0 = 無制限。",
-      "speedLimit": "Downlink Speed Limit (MB/s)",
-      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
+      "speedLimit": "Speed Limit (MB/s)",
+      "speedLimitDesc": "Legacy single speed limit field; use upload/download limits in the current UI.",
       "expiryTime": "有効期限",
       "addClients": "クライアントを追加",
       "limitIp": "IP 制限",
@@ -950,7 +950,13 @@
         "imported": "{count} 件のクライアントをインポートしました",
         "importedMixed": "{ok} 件インポート、{failed} 件スキップ"
       },
-      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place.",
+      "upSpeedLimit": "Upload Limit (MB/s)",
+      "upSpeedLimitDesc": "Client upload / server inbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
+      "downSpeedLimit": "Download Limit (MB/s)",
+      "downSpeedLimitDesc": "Client download / server outbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
+      "upSpeedLimitShort": "Up",
+      "downSpeedLimitShort": "Down"
     },
     "groups": {
       "title": "グループ",

@@ -229,6 +229,7 @@ export interface Client {
   auth?: string;
   comment: string;
   created_at?: number;
+  downSpeedLimit: number;
   email: string;
   enable: boolean;
   expiryTime: number;
@@ -249,6 +250,7 @@ export interface Client {
   subId: string;
   tgId: number;
   totalGB: number;
+  upSpeedLimit: number;
   updated_at?: number;
 }
 
@@ -265,6 +267,7 @@ export interface ClientRecord {
   auth: string;
   comment: string;
   createdAt: number;
+  downSpeedLimit: number;
   email: string;
   enable: boolean;
   expiryTime: number;
@@ -285,6 +288,7 @@ export interface ClientRecord {
   subId: string;
   tgId: number;
   totalGB: number;
+  upSpeedLimit: number;
   updatedAt: number;
   uuid: string;
 }

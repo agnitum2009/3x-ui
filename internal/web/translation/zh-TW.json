@@ -798,8 +798,8 @@
       "actions": "操作",
       "totalGB": "流量上限 (GB)",
       "totalGBDesc": "該客戶端的流量配額。0 = 不限制。",
-      "speedLimit": "下行限速 (MB/s)",
-      "speedLimitDesc": "服務端出站 / 客戶端下行速度上限，單位 MB/s（位元組/秒）。0 = 不限制，最大 1000.0。",
+      "speedLimit": "限速 (MB/s)",
+      "speedLimitDesc": "舊版單項限速欄位；新版本請使用上行/下行限速。",
       "expiryTime": "到期時間",
       "addClients": "新增客戶端",
       "limitIp": "IP 限制",
@@ -950,7 +950,13 @@
         "imported": "已匯入 {count} 個客戶端",
         "importedMixed": "已匯入 {ok} 個，跳過 {failed} 個"
       },
-      "speedLimitInvalid": "限速必須在 0 到 1000.0 MB/s 之間，最多一位小數。"
+      "speedLimitInvalid": "限速必須在 0 到 1000.0 MB/s 之間，最多一位小數。",
+      "upSpeedLimit": "上行限速 (MB/s)",
+      "upSpeedLimitDesc": "客戶端上傳 / 服務端入站速度上限。0 = 不限制，最大 1000.0 MB/s。",
+      "downSpeedLimit": "下行限速 (MB/s)",
+      "downSpeedLimitDesc": "客戶端下載 / 服務端出站速度上限。0 = 不限制，最大 1000.0 MB/s。",
+      "upSpeedLimitShort": "上行",
+      "downSpeedLimitShort": "下行"
     },
     "groups": {
       "title": "群組",
