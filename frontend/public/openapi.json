@@ -1179,6 +1179,10 @@
             "description": "Security method (e.g., \"auto\", \"aes-128-gcm\")",
             "type": "string"
           },
+          "speedLimit": {
+            "description": "Per-client speed limit in bytes/s; 0 means unlimited",
+            "type": "integer"
+          },
           "subId": {
             "description": "Subscription identifier",
             "type": "string"
@@ -1204,6 +1208,7 @@
           "limitIp",
           "reset",
           "security",
+          "speedLimit",
           "subId",
           "tgId",
           "totalGB"
@@ -1296,6 +1301,9 @@
           "security": {
             "type": "string"
           },
+          "speedLimit": {
+            "type": "integer"
+          },
           "subId": {
             "type": "string"
           },
@@ -1334,6 +1342,7 @@
           "reverse",
           "secret",
           "security",
+          "speedLimit",
           "subId",
           "tgId",
           "totalGB",

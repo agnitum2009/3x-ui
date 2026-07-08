@@ -172,6 +172,12 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 				flow = "xtls-rprx-vision"
 			}
 			entry := map[string]any{"email": c.Email}
+			if c.SpeedLimit > 0 {
+				entry["speedLimit"] = c.SpeedLimit
+			}
+			if c.LimitIP > 0 {
+				entry["deviceLimit"] = c.LimitIP
+			}
 			switch inbound.Protocol {
 			case model.VLESS:
 				if c.ID != "" {
@@ -207,6 +213,12 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 				}
 			case model.WireGuard:
 				peer := map[string]any{"email": c.Email, "level": 0}
+				if c.SpeedLimit > 0 {
+					peer["speedLimit"] = c.SpeedLimit
+				}
+				if c.LimitIP > 0 {
+					peer["deviceLimit"] = c.LimitIP
+				}
 				if c.PublicKey != "" {
 					peer["publicKey"] = c.PublicKey
 				}

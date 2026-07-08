@@ -59,7 +59,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useClients } from '@/hooks/useClients';
 import { useNodesQuery } from '@/api/queries/useNodesQuery';
 import { useDatepicker } from '@/hooks/useDatepicker';
-import type { ClientRecord, InboundOption, ExternalLink, ExternalLinkInput } from '@/hooks/useClients';
+import type { ClientRecord, InboundOption, ExternalLink, ExternalLinkInput, ClientSpeedEntry } from '@/hooks/useClients';
 import ClientTrafficCell from '@/components/clients/ClientTrafficCell';
 import ClientSpeedTag, { isActiveSpeed } from '@/components/clients/ClientSpeedTag';
 import AppSidebar from '@/layouts/AppSidebar';
@@ -84,6 +84,32 @@ import './ClientsPage.css';
 
 const FILTER_STATE_KEY = 'clientsFilterState';
 const DISABLED_PAGE_SIZE = 200;
+
+function SpeedLimitCell({
+  limit,
+  speed,
+  t,
+}: {
+  limit?: number;
+  speed?: ClientSpeedEntry;
+  t: (key: string) => string;
+}) {
+  const configured = Number(limit) || 0;
+  const hasLive = isActiveSpeed(speed);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+      <Tag color={configured > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
+        {t('pages.clients.speedLimitConfigured')}: {configured > 0 ? SizeFormatter.speedFormat(configured) : '∞'}
+      </Tag>
+      {hasLive && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: 'var(--ant-color-text-secondary)' }}>{t('pages.clients.speedLive')}</span>
+          <ClientSpeedTag speed={speed} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function UngroupIcon() {
   return (
@@ -907,13 +933,11 @@ export default function ClientsPage() {
     {
       title: t('pages.clients.speed'),
       key: 'speed',
-      width: 110,
+      width: 180,
       align: 'center',
-      render: (_v, record) => {
-        const speed = clientSpeed[record.email];
-        if (!isActiveSpeed(speed)) return <Tag color="default">—</Tag>;
-        return <ClientSpeedTag speed={speed} />;
-      },
+      render: (_v, record) => (
+        <SpeedLimitCell limit={record.speedLimit} speed={clientSpeed[record.email]} t={t} />
+      ),
     },
     {
       title: t('pages.clients.remaining'),
@@ -1441,15 +1465,9 @@ export default function ClientsPage() {
                                     enabled={row.enable}
                                     trafficDiff={trafficDiff}
                                   />
-                                  {(() => {
-                                    const speed = clientSpeed[row.email];
-                                    if (!isActiveSpeed(speed)) return null;
-                                    return (
-                                      <div className="client-card-speed">
-                                        <ClientSpeedTag speed={speed} />
-                                      </div>
-                                    );
-                                  })()}
+                                  <div className="client-card-speed">
+                                    <SpeedLimitCell limit={row.speedLimit} speed={clientSpeed[row.email]} t={t} />
+                                  </div>
                                 </div>
                               );
                             })}

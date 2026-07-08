@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -83,6 +84,44 @@ func getOptionalUserString(user map[string]any, key string) (string, error) {
 	}
 
 	return strValue, nil
+}
+
+func getOptionalUserUint64(user map[string]any, key string) (uint64, error) {
+	value, ok := user[key]
+	if !ok || value == nil {
+		return 0, nil
+	}
+	switch v := value.(type) {
+	case uint64:
+		return v, nil
+	case uint32:
+		return uint64(v), nil
+	case uint:
+		return uint64(v), nil
+	case int:
+		if v < 0 {
+			return 0, fmt.Errorf("invalid negative user field %q: %d", key, v)
+		}
+		return uint64(v), nil
+	case int64:
+		if v < 0 {
+			return 0, fmt.Errorf("invalid negative user field %q: %d", key, v)
+		}
+		return uint64(v), nil
+	case float64:
+		if v < 0 || math.Trunc(v) != v || v > float64(math.MaxUint64) {
+			return 0, fmt.Errorf("invalid numeric user field %q: %v", key, v)
+		}
+		return uint64(v), nil
+	case json.Number:
+		parsed, err := strconv.ParseUint(string(v), 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("invalid numeric user field %q: %w", key, err)
+		}
+		return parsed, nil
+	default:
+		return 0, fmt.Errorf("invalid type for user field %q: %T", key, value)
+	}
 }
 
 // Init connects to the Xray API server and initializes handler and stats service clients.
@@ -525,10 +564,10 @@ func buildUserAccount(protocolName string, user map[string]any) (*serial.TypedMe
 		case "xchacha20-poly1305", "xchacha20-ietf-poly1305":
 			ssCipherType = shadowsocks.CipherType_XCHACHA20_POLY1305
 		default:
-			ssCipherType = shadowsocks.CipherType_NONE
+			ssCipherType = shadowsocks.CipherType_UNKNOWN
 		}
 
-		if ssCipherType != shadowsocks.CipherType_NONE {
+		if ssCipherType != shadowsocks.CipherType_UNKNOWN {
 			return serial.ToTypedMessage(&shadowsocks.Account{
 				Password:   password,
 				CipherType: ssCipherType,
@@ -601,6 +640,24 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 		return nil
 	}
 
+	speedLimit, err := getOptionalUserUint64(user, "speedLimit")
+	if err != nil {
+		return err
+	}
+	deviceLimit64, err := getOptionalUserUint64(user, "deviceLimit")
+	if err != nil {
+		return err
+	}
+	if deviceLimit64 == 0 {
+		deviceLimit64, err = getOptionalUserUint64(user, "limitIp")
+		if err != nil {
+			return err
+		}
+	}
+	if deviceLimit64 > math.MaxUint32 {
+		return fmt.Errorf("invalid numeric user field %q: %d overflows uint32", "deviceLimit", deviceLimit64)
+	}
+
 	if x.HandlerServiceClient == nil {
 		return common.NewError("xray HandlerServiceClient is not initialized")
 	}
@@ -612,8 +669,10 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 		Tag: inboundTag,
 		Operation: serial.ToTypedMessage(&command.AddUserOperation{
 			User: &protocol.User{
-				Email:   userEmail,
-				Account: account,
+				Email:       userEmail,
+				Account:     account,
+				SpeedLimit:  speedLimit,
+				DeviceLimit: uint32(deviceLimit64),
 			},
 		}),
 	})

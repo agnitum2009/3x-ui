@@ -701,6 +701,7 @@ type Client struct {
 	AdTag        string         `json:"adTag,omitempty" example:"0123456789abcdef0123456789abcdef"`
 	Email        string         `json:"email"`                        // Client email identifier
 	LimitIP      int            `json:"limitIp"`                      // IP limit for this client
+	SpeedLimit   uint64         `json:"speedLimit" form:"speedLimit"` // Per-client speed limit in bytes/s; 0 means unlimited
 	TotalGB      int64          `json:"totalGB" form:"totalGB"`       // Total traffic limit in GB
 	ExpiryTime   int64          `json:"expiryTime" form:"expiryTime"` // Expiration timestamp
 	Enable       bool           `json:"enable" form:"enable"`         // Whether the client is enabled
@@ -731,6 +732,7 @@ type ClientRecord struct {
 	Secret       string `json:"secret" gorm:"column:secret"`
 	AdTag        string `json:"adTag" gorm:"column:ad_tag;default:''"`
 	LimitIP      int    `json:"limitIp" gorm:"column:limit_ip"`
+	SpeedLimit   uint64 `json:"speedLimit" gorm:"column:speed_limit;default:0"`
 	TotalGB      int64  `json:"totalGB" gorm:"column:total_gb"`
 	ExpiryTime   int64  `json:"expiryTime" gorm:"column:expiry_time"`
 	Enable       bool   `json:"enable" gorm:"default:true"`
@@ -898,6 +900,7 @@ func (c *Client) ToRecord() *ClientRecord {
 		Flow:       c.Flow,
 		Security:   c.Security,
 		LimitIP:    c.LimitIP,
+		SpeedLimit: c.SpeedLimit,
 		TotalGB:    c.TotalGB,
 		ExpiryTime: c.ExpiryTime,
 		Enable:     c.Enable,
@@ -951,6 +954,7 @@ func (r *ClientRecord) ToClient() *Client {
 		Flow:       r.Flow,
 		Security:   r.Security,
 		LimitIP:    r.LimitIP,
+		SpeedLimit: r.SpeedLimit,
 		TotalGB:    r.TotalGB,
 		ExpiryTime: r.ExpiryTime,
 		Enable:     r.Enable,
@@ -1081,6 +1085,16 @@ func MergeClientRecord(existing *ClientRecord, incoming *ClientRecord) []ClientM
 		if picked != existing.LimitIP {
 			keep("limitIp", existing.LimitIP, incoming.LimitIP, picked)
 			existing.LimitIP = picked
+		}
+	}
+	if existing.SpeedLimit != incoming.SpeedLimit && incoming.SpeedLimit != 0 {
+		picked := existing.SpeedLimit
+		if existing.SpeedLimit == 0 || incoming.SpeedLimit > existing.SpeedLimit {
+			picked = incoming.SpeedLimit
+		}
+		if picked != existing.SpeedLimit {
+			keep("speedLimit", existing.SpeedLimit, incoming.SpeedLimit, picked)
+			existing.SpeedLimit = picked
 		}
 	}
 	if existing.TgID != incoming.TgID && incoming.TgID != 0 {

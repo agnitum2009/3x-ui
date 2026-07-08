@@ -1153,6 +1153,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Security method (e.g., \"auto\", \"aes-128-gcm\")",
         "type": "string"
       },
+      "speedLimit": {
+        "description": "Per-client speed limit in bytes/s; 0 means unlimited",
+        "type": "integer"
+      },
       "subId": {
         "description": "Subscription identifier",
         "type": "string"
@@ -1178,6 +1182,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "limitIp",
       "reset",
       "security",
+      "speedLimit",
       "subId",
       "tgId",
       "totalGB"
@@ -1270,6 +1275,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "security": {
         "type": "string"
       },
+      "speedLimit": {
+        "type": "integer"
+      },
       "subId": {
         "type": "string"
       },
@@ -1308,6 +1316,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "reverse",
       "secret",
       "security",
+      "speedLimit",
       "subId",
       "tgId",
       "totalGB",

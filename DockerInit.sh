@@ -1,4 +1,5 @@
 #!/bin/sh
+set -eu
 case $1 in
     amd64)
         ARCH="64"
@@ -26,12 +27,19 @@ case $1 in
         ;;
 esac
 MTG_MULTI_VER="v1.14.0"
+XRAY_CORE_REPO="${XRAY_CORE_REPO:-agnitum2009/Xray-core}"
+XRAY_CORE_VERSION="${XRAY_CORE_VERSION:-v26.6.27-speed}"
 mkdir -p build/bin
 cd build/bin
-curl -sfLRO "https://github.com/XTLS/Xray-core/releases/download/v26.6.27/Xray-linux-${ARCH}.zip"
-unzip "Xray-linux-${ARCH}.zip"
-rm -f "Xray-linux-${ARCH}.zip" geoip.dat geosite.dat
-mv xray "xray-linux-${FNAME}"
+if [ -n "${XRAY_LOCAL_BIN:-}" ]; then
+    cp "${XRAY_LOCAL_BIN}" "xray-linux-${FNAME}"
+else
+    curl -sfLRO "https://github.com/${XRAY_CORE_REPO}/releases/download/${XRAY_CORE_VERSION}/Xray-linux-${ARCH}.zip"
+    unzip "Xray-linux-${ARCH}.zip"
+    rm -f "Xray-linux-${ARCH}.zip" geoip.dat geosite.dat
+    mv xray "xray-linux-${FNAME}"
+fi
+chmod +x "xray-linux-${FNAME}"
 # mtg-multi (MTProto sidecar) ships prebuilt release binaries for every target
 # we package, so download and unpack the matching one instead of compiling.
 case $FNAME in
