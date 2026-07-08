@@ -798,8 +798,8 @@
       "actions": "操作",
       "totalGB": "流量上限 (GB)",
       "totalGBDesc": "该客户端的流量配额。0 = 不限制。",
-      "speedLimit": "限速 (B/s)",
-      "speedLimitDesc": "该客户端的速度上限，单位为字节/秒。0 = 不限制。",
+      "speedLimit": "下行限速 (MB/s)",
+      "speedLimitDesc": "服务端出站 / 客户端下行速度上限，单位 MB/s（字节/秒）。0 = 不限制，最大 1000.0。",
       "expiryTime": "过期时间",
       "addClients": "添加客户端",
       "limitIp": "IP 限制",
@@ -820,8 +820,8 @@
       "comment": "备注",
       "traffic": "流量",
       "speed": "速度",
-      "speedLimitConfigured": "限制",
-      "speedLive": "当前",
+      "speedLimitConfigured": "限速",
+      "speedLive": "当前实时",
       "offline": "离线",
       "addClient": "添加客户端",
       "qrCode": "二维码",
@@ -949,7 +949,8 @@
         "delOrphans": "已删除 {count} 个未关联的客户端",
         "imported": "已导入 {count} 个客户端",
         "importedMixed": "已导入 {ok} 个，跳过 {failed} 个"
-      }
+      },
+      "speedLimitInvalid": "限速必须在 0 到 1000.0 MB/s 之间，最多一位小数。"
     },
     "groups": {
       "title": "分组",

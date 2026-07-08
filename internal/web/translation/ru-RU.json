@@ -798,8 +798,8 @@
       "actions": "Действия",
       "totalGB": "Лимит трафика (ГБ)",
       "totalGBDesc": "Квота трафика для этого клиента. 0 = без ограничений.",
-      "speedLimit": "Speed Limit (B/s)",
-      "speedLimitDesc": "Maximum speed for this client in bytes per second. 0 = unlimited.",
+      "speedLimit": "Downlink Speed Limit (MB/s)",
+      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
       "expiryTime": "Срок действия",
       "addClients": "Добавить клиентов",
       "limitIp": "Лимит IP",
@@ -821,7 +821,7 @@
       "traffic": "Трафик",
       "speed": "Скорость",
       "speedLimitConfigured": "Limit",
-      "speedLive": "Now",
+      "speedLive": "Live now",
       "offline": "Не в сети",
       "addClient": "Добавить клиента",
       "qrCode": "QR-код",
@@ -949,7 +949,8 @@
         "delOrphans": "Удалено клиентов без входящего: {count}",
         "imported": "Импортировано клиентов: {count}",
         "importedMixed": "Импортировано: {ok}, пропущено: {failed}"
-      }
+      },
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
     },
     "groups": {
       "title": "Группы",

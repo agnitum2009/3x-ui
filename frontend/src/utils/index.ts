@@ -668,6 +668,21 @@ export class SizeFormatter {
   static speedFormat(bps: number | null | undefined): string {
     return SizeFormatter.sizeFormat(bps) + '/s';
   }
+
+  static speedBytesToMBps(bps: number | null | undefined): number {
+    if (bps == null || !Number.isFinite(bps) || bps <= 0) return 0;
+    return Math.round((bps / SizeFormatter.ONE_MB) * 10) / 10;
+  }
+
+  static speedMBpsToBytes(mbps: number | null | undefined): number {
+    if (mbps == null || !Number.isFinite(mbps) || mbps <= 0) return 0;
+    return Math.round(mbps * SizeFormatter.ONE_MB);
+  }
+
+  static speedMBpsFormat(bps: number | null | undefined): string {
+    const mbps = SizeFormatter.speedBytesToMBps(bps);
+    return mbps <= 0 ? '0 MB/s' : `${mbps.toFixed(1)} MB/s`;
+  }
 }
 
 export class CPUFormatter {

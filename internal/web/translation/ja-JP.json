@@ -798,8 +798,8 @@
       "actions": "操作",
       "totalGB": "トラフィック上限 (GB)",
       "totalGBDesc": "このクライアントのデータ割当量。0 = 無制限。",
-      "speedLimit": "Speed Limit (B/s)",
-      "speedLimitDesc": "Maximum speed for this client in bytes per second. 0 = unlimited.",
+      "speedLimit": "Downlink Speed Limit (MB/s)",
+      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
       "expiryTime": "有効期限",
       "addClients": "クライアントを追加",
       "limitIp": "IP 制限",
@@ -821,7 +821,7 @@
       "traffic": "トラフィック",
       "speed": "速度",
       "speedLimitConfigured": "Limit",
-      "speedLive": "Now",
+      "speedLive": "Live now",
       "offline": "オフライン",
       "addClient": "クライアントを追加",
       "qrCode": "QR コード",
@@ -949,7 +949,8 @@
         "delOrphans": "未アタッチの {count} 件のクライアントを削除しました",
         "imported": "{count} 件のクライアントをインポートしました",
         "importedMixed": "{ok} 件インポート、{failed} 件スキップ"
-      }
+      },
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
     },
     "groups": {
       "title": "グループ",

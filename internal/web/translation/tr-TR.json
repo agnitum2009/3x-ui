@@ -798,8 +798,8 @@
       "actions": "İşlemler",
       "totalGB": "Trafik Limiti (GB)",
       "totalGBDesc": "Bu kullanıcı için veri kotası. 0 = sınırsız.",
-      "speedLimit": "Speed Limit (B/s)",
-      "speedLimitDesc": "Maximum speed for this client in bytes per second. 0 = unlimited.",
+      "speedLimit": "Downlink Speed Limit (MB/s)",
+      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
       "expiryTime": "Son Kullanma",
       "addClients": "Kullanıcı Ekle",
       "limitIp": "IP Limiti",
@@ -821,7 +821,7 @@
       "traffic": "Trafik",
       "speed": "Hız",
       "speedLimitConfigured": "Limit",
-      "speedLive": "Now",
+      "speedLive": "Live now",
       "offline": "Çevrimdışı",
       "addClient": "Kullanıcı Ekle",
       "qrCode": "QR Kodu",
@@ -949,7 +949,8 @@
         "delOrphans": "{count} bağsız kullanıcı silindi",
         "imported": "{count} kullanıcı içe aktarıldı",
         "importedMixed": "{ok} içe aktarıldı, {failed} atlandı"
-      }
+      },
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
     },
     "groups": {
       "title": "Gruplar",

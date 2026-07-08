@@ -798,8 +798,8 @@
       "actions": "Aksi",
       "totalGB": "Batas Trafik (GB)",
       "totalGBDesc": "Kuota data untuk klien ini. 0 = tidak terbatas.",
-      "speedLimit": "Speed Limit (B/s)",
-      "speedLimitDesc": "Maximum speed for this client in bytes per second. 0 = unlimited.",
+      "speedLimit": "Downlink Speed Limit (MB/s)",
+      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
       "expiryTime": "Kedaluwarsa",
       "addClients": "Tambah klien",
       "limitIp": "Batas IP",
@@ -821,7 +821,7 @@
       "traffic": "Lalu lintas",
       "speed": "Kecepatan",
       "speedLimitConfigured": "Limit",
-      "speedLive": "Now",
+      "speedLive": "Live now",
       "offline": "Offline",
       "addClient": "Tambah klien",
       "qrCode": "Kode QR",
@@ -949,7 +949,8 @@
         "delOrphans": "{count} klien tanpa inbound dihapus",
         "imported": "{count} klien diimpor",
         "importedMixed": "{ok} diimpor, {failed} dilewati"
-      }
+      },
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
     },
     "groups": {
       "title": "Grup",

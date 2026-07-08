@@ -798,8 +798,8 @@
       "actions": "操作",
       "totalGB": "流量上限 (GB)",
       "totalGBDesc": "該客戶端的流量配額。0 = 不限制。",
-      "speedLimit": "限速 (B/s)",
-      "speedLimitDesc": "該客戶端的速度上限，單位為位元組/秒。0 = 不限制。",
+      "speedLimit": "下行限速 (MB/s)",
+      "speedLimitDesc": "服務端出站 / 客戶端下行速度上限，單位 MB/s（位元組/秒）。0 = 不限制，最大 1000.0。",
       "expiryTime": "到期時間",
       "addClients": "新增客戶端",
       "limitIp": "IP 限制",
@@ -820,8 +820,8 @@
       "comment": "備註",
       "traffic": "流量",
       "speed": "速度",
-      "speedLimitConfigured": "限制",
-      "speedLive": "當前",
+      "speedLimitConfigured": "限速",
+      "speedLive": "目前即時",
       "offline": "離線",
       "addClient": "新增客戶端",
       "qrCode": "QR 碼",
@@ -949,7 +949,8 @@
         "delOrphans": "已刪除 {count} 個未關聯的客戶端",
         "imported": "已匯入 {count} 個客戶端",
         "importedMixed": "已匯入 {ok} 個，跳過 {failed} 個"
-      }
+      },
+      "speedLimitInvalid": "限速必須在 0 到 1000.0 MB/s 之間，最多一位小數。"
     },
     "groups": {
       "title": "群組",

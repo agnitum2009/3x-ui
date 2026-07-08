@@ -199,7 +199,10 @@ export const ClientFormSchema = z.object({
   delayedDays: z.number().int().min(0),
   reset: z.number().int().min(0),
   limitIp: z.number().int().min(0),
-  speedLimit: z.number().int().min(0),
+  speedLimit: z.number()
+    .min(0, 'pages.clients.speedLimitInvalid')
+    .max(1000, 'pages.clients.speedLimitInvalid')
+    .refine((v) => Math.abs(v * 10 - Math.round(v * 10)) < Number.EPSILON * 10, 'pages.clients.speedLimitInvalid'),
   tgId: z.number().int().min(0),
   group: z.string(),
   comment: z.string(),

@@ -99,7 +99,7 @@ function SpeedLimitCell({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
       <Tag color={configured > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
-        {t('pages.clients.speedLimitConfigured')}: {configured > 0 ? SizeFormatter.speedFormat(configured) : '∞'}
+        {t('pages.clients.speedLimitConfigured')}: {configured > 0 ? SizeFormatter.speedMBpsFormat(configured) : t('unlimited')}
       </Tag>
       {hasLive && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>

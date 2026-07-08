@@ -798,8 +798,8 @@
       "actions": "الإجراءات",
       "totalGB": "حد البيانات (جيجابايت)",
       "totalGBDesc": "حصة البيانات لهذا العميل. 0 = غير محدود.",
-      "speedLimit": "Speed Limit (B/s)",
-      "speedLimitDesc": "Maximum speed for this client in bytes per second. 0 = unlimited.",
+      "speedLimit": "Downlink Speed Limit (MB/s)",
+      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
       "expiryTime": "انتهاء الصلاحية",
       "addClients": "إضافة عملاء",
       "limitIp": "حد عناوين IP",
@@ -821,7 +821,7 @@
       "traffic": "حركة المرور",
       "speed": "السرعة",
       "speedLimitConfigured": "Limit",
-      "speedLive": "Now",
+      "speedLive": "Live now",
       "offline": "غير متصل",
       "addClient": "إضافة عميل",
       "qrCode": "رمز QR",
@@ -949,7 +949,8 @@
         "delOrphans": "تم حذف {count} عميل غير مرتبط",
         "imported": "تم استيراد {count} عميل",
         "importedMixed": "{ok} تم استيرادهم، {failed} تم تخطيهم"
-      }
+      },
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
     },
     "groups": {
       "title": "المجموعات",

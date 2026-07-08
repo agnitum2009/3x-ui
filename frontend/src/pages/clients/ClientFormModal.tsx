@@ -22,7 +22,7 @@ import {
 import { DeleteOutlined, EyeOutlined, PlusOutlined, ReloadOutlined, RetweetOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import { HttpUtil, RandomUtil, Wireguard } from '@/utils';
+import { HttpUtil, RandomUtil, SizeFormatter, Wireguard } from '@/utils';
 import { formatInboundLabel } from '@/lib/inbounds/label';
 import { generateMtprotoSecret } from '@/lib/xray/inbound-defaults';
 import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
@@ -246,6 +246,7 @@ export default function ClientFormModal({
         totalGB: bytesToGB(client.totalGB || 0),
         reset: Number(client.reset) || 0,
         limitIp: client.limitIp || 0,
+        speedLimit: SizeFormatter.speedBytesToMBps(client.speedLimit || 0),
         tgId: Number(client.tgId) || 0,
         group: client.group || '',
         comment: client.comment || '',
@@ -518,7 +519,7 @@ export default function ClientFormModal({
       expiryTime,
       reset: Number(form.reset) || 0,
       limitIp: Number(form.limitIp) || 0,
-      speedLimit: Number(form.speedLimit) || 0,
+      speedLimit: SizeFormatter.speedMBpsToBytes(form.speedLimit),
       tgId: Number(form.tgId) || 0,
       group: form.group,
       comment: form.comment,
@@ -655,7 +656,7 @@ export default function ClientFormModal({
                       </Col>
                       <Col xs={24} md={4}>
                         <Form.Item label={t('pages.clients.speedLimit')} tooltip={t('pages.clients.speedLimitDesc')}>
-                          <InputNumber value={form.speedLimit} min={0} step={1024} style={{ width: '100%' }}
+                          <InputNumber value={form.speedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
                             onChange={(v) => update('speedLimit', Number(v) || 0)} />
                         </Form.Item>
                       </Col>

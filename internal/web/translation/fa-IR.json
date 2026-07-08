@@ -798,8 +798,8 @@
       "actions": "عملیات",
       "totalGB": "سقف حجم (گیگابایت)",
       "totalGBDesc": "سهمیه‌ی حجم مصرفی کلاینت. ۰ = نامحدود",
-      "speedLimit": "Speed Limit (B/s)",
-      "speedLimitDesc": "Maximum speed for this client in bytes per second. 0 = unlimited.",
+      "speedLimit": "Downlink Speed Limit (MB/s)",
+      "speedLimitDesc": "Server outbound / client downlink speed limit in MB/s (bytes per second). 0 = unlimited, max 1000.0.",
       "expiryTime": "انقضا",
       "addClients": "افزودن کلاینت‌ها",
       "limitIp": "محدودیت IP",
@@ -821,7 +821,7 @@
       "traffic": "ترافیک",
       "speed": "سرعت",
       "speedLimitConfigured": "Limit",
-      "speedLive": "Now",
+      "speedLive": "Live now",
       "offline": "آفلاین",
       "addClient": "افزودن کلاینت",
       "qrCode": "کد QR",
@@ -949,7 +949,8 @@
         "delOrphans": "{count} کلاینت بدون اینباند حذف شد",
         "imported": "{count} کلاینت وارد شد",
         "importedMixed": "{ok} وارد شد، {failed} رد شد"
-      }
+      },
+      "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place."
     },
     "groups": {
       "title": "گروه‌ها",
