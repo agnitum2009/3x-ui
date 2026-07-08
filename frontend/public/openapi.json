@@ -1183,6 +1183,10 @@
             "description": "Security method (e.g., \"auto\", \"aes-128-gcm\")",
             "type": "string"
           },
+          "sessionLimit": {
+            "description": "Concurrent session/connection limit; 0 means unlimited",
+            "type": "integer"
+          },
           "speedLimit": {
             "description": "Legacy per-client speed limit in bytes/s; treated as downlink when directional fields are absent",
             "type": "integer"
@@ -1217,6 +1221,7 @@
           "limitIp",
           "reset",
           "security",
+          "sessionLimit",
           "speedLimit",
           "subId",
           "tgId",
@@ -1314,6 +1319,9 @@
           "security": {
             "type": "string"
           },
+          "sessionLimit": {
+            "type": "integer"
+          },
           "speedLimit": {
             "type": "integer"
           },
@@ -1359,6 +1367,7 @@
           "reverse",
           "secret",
           "security",
+          "sessionLimit",
           "speedLimit",
           "subId",
           "tgId",

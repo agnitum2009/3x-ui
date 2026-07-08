@@ -90,16 +90,19 @@ function SpeedLimitCell({
   downLimit,
   legacyLimit,
   speed,
+  sessionLimit,
   t,
 }: {
   upLimit?: number;
   downLimit?: number;
   legacyLimit?: number;
   speed?: ClientSpeedEntry;
+  sessionLimit?: number;
   t: (key: string) => string;
 }) {
   const up = Number(upLimit) || 0;
   const down = Number(downLimit || legacyLimit) || 0;
+  const sessions = Number(sessionLimit) || 0;
   const hasLive = isActiveSpeed(speed);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
@@ -108,6 +111,9 @@ function SpeedLimitCell({
       </Tag>
       <Tag color={down > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
         {t('pages.clients.downSpeedLimitShort')}: {down > 0 ? SizeFormatter.speedMBpsFormat(down) : t('unlimited')}
+      </Tag>
+      <Tag color={sessions > 0 ? 'blue' : 'default'} style={{ margin: 0 }}>
+        {t('pages.clients.sessionLimitShort')}: {sessions > 0 ? sessions : t('unlimited')}
       </Tag>
       {hasLive && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
@@ -944,7 +950,7 @@ export default function ClientsPage() {
       width: 180,
       align: 'center',
       render: (_v, record) => (
-        <SpeedLimitCell upLimit={record.upSpeedLimit} downLimit={record.downSpeedLimit} legacyLimit={record.speedLimit} speed={clientSpeed[record.email]} t={t} />
+        <SpeedLimitCell upLimit={record.upSpeedLimit} downLimit={record.downSpeedLimit} legacyLimit={record.speedLimit} speed={clientSpeed[record.email]} sessionLimit={record.sessionLimit} t={t} />
       ),
     },
     {
@@ -1474,7 +1480,7 @@ export default function ClientsPage() {
                                     trafficDiff={trafficDiff}
                                   />
                                   <div className="client-card-speed">
-                                    <SpeedLimitCell upLimit={row.upSpeedLimit} downLimit={row.downSpeedLimit} legacyLimit={row.speedLimit} speed={clientSpeed[row.email]} t={t} />
+                                    <SpeedLimitCell upLimit={row.upSpeedLimit} downLimit={row.downSpeedLimit} legacyLimit={row.speedLimit} speed={clientSpeed[row.email]} sessionLimit={row.sessionLimit} t={t} />
                                   </div>
                                 </div>
                               );

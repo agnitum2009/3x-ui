@@ -185,6 +185,9 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 			if c.LimitIP > 0 {
 				entry["deviceLimit"] = c.LimitIP
 			}
+			if c.SessionLimit > 0 {
+				entry["sessionLimit"] = c.SessionLimit
+			}
 			switch inbound.Protocol {
 			case model.VLESS:
 				if c.ID != "" {
@@ -232,6 +235,9 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 				}
 				if c.LimitIP > 0 {
 					peer["deviceLimit"] = c.LimitIP
+				}
+				if c.SessionLimit > 0 {
+					peer["sessionLimit"] = c.SessionLimit
 				}
 				if c.PublicKey != "" {
 					peer["publicKey"] = c.PublicKey

@@ -950,13 +950,17 @@
         "imported": "{count} کلاینت وارد شد",
         "importedMixed": "{ok} وارد شد، {failed} رد شد"
       },
+      "sessionLimitInvalid": "Session limit must be an integer between 0 and 10000.",
       "speedLimitInvalid": "Speed limit must be between 0 and 1000.0 MB/s, with at most one decimal place.",
       "upSpeedLimit": "Upload Limit (MB/s)",
       "upSpeedLimitDesc": "Client upload / server inbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
       "downSpeedLimit": "Download Limit (MB/s)",
       "downSpeedLimitDesc": "Client download / server outbound speed limit. 0 = unlimited, max 1000.0 MB/s.",
       "upSpeedLimitShort": "Up",
-      "downSpeedLimitShort": "Down"
+      "downSpeedLimitShort": "Down",
+      "sessionLimit": "Session Limit",
+      "sessionLimitDesc": "Maximum concurrent sessions/connections for this client. 0 = unlimited, max 10000.",
+      "sessionLimitShort": "Sessions"
     },
     "groups": {
       "title": "گروه‌ها",

@@ -466,6 +466,7 @@ func (s *ClientService) Update(inboundSvc *InboundService, id int, updated model
 			"speed_limit":      downSpeedLimit,
 			"up_speed_limit":   updated.UpSpeedLimit,
 			"down_speed_limit": downSpeedLimit,
+			"session_limit":    updated.SessionLimit,
 		}).Error; err != nil {
 		return needRestart, err
 	}

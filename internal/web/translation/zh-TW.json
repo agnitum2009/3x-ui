@@ -950,13 +950,17 @@
         "imported": "已匯入 {count} 個客戶端",
         "importedMixed": "已匯入 {ok} 個，跳過 {failed} 個"
       },
+      "sessionLimitInvalid": "會話限制必須是 0 到 10000 之間的整數。",
       "speedLimitInvalid": "限速必須在 0 到 1000.0 MB/s 之間，最多一位小數。",
       "upSpeedLimit": "上行限速 (MB/s)",
       "upSpeedLimitDesc": "客戶端上傳 / 服務端入站速度上限。0 = 不限制，最大 1000.0 MB/s。",
       "downSpeedLimit": "下行限速 (MB/s)",
       "downSpeedLimitDesc": "客戶端下載 / 服務端出站速度上限。0 = 不限制，最大 1000.0 MB/s。",
       "upSpeedLimitShort": "上行",
-      "downSpeedLimitShort": "下行"
+      "downSpeedLimitShort": "下行",
+      "sessionLimit": "會話限制",
+      "sessionLimitDesc": "此客戶端最大同時會話/連線數。0 = 不限制，最大 10000。",
+      "sessionLimitShort": "會話"
     },
     "groups": {
       "title": "群組",

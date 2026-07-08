@@ -1157,6 +1157,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Security method (e.g., \"auto\", \"aes-128-gcm\")",
         "type": "string"
       },
+      "sessionLimit": {
+        "description": "Concurrent session/connection limit; 0 means unlimited",
+        "type": "integer"
+      },
       "speedLimit": {
         "description": "Legacy per-client speed limit in bytes/s; treated as downlink when directional fields are absent",
         "type": "integer"
@@ -1191,6 +1195,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "limitIp",
       "reset",
       "security",
+      "sessionLimit",
       "speedLimit",
       "subId",
       "tgId",
@@ -1288,6 +1293,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "security": {
         "type": "string"
       },
+      "sessionLimit": {
+        "type": "integer"
+      },
       "speedLimit": {
         "type": "integer"
       },
@@ -1333,6 +1341,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "reverse",
       "secret",
       "security",
+      "sessionLimit",
       "speedLimit",
       "subId",
       "tgId",

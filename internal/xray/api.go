@@ -668,6 +668,13 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 	if deviceLimit64 > math.MaxUint32 {
 		return fmt.Errorf("invalid numeric user field %q: %d overflows uint32", "deviceLimit", deviceLimit64)
 	}
+	sessionLimit64, err := getOptionalUserUint64(user, "sessionLimit")
+	if err != nil {
+		return err
+	}
+	if sessionLimit64 > math.MaxUint32 {
+		return fmt.Errorf("invalid numeric user field %q: %d overflows uint32", "sessionLimit", sessionLimit64)
+	}
 
 	if x.HandlerServiceClient == nil {
 		return common.NewError("xray HandlerServiceClient is not initialized")
@@ -686,6 +693,7 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 				UpSpeedLimit:   upSpeedLimit,
 				DownSpeedLimit: downSpeedLimit,
 				DeviceLimit:    uint32(deviceLimit64),
+				SessionLimit:   uint32(sessionLimit64),
 			},
 		}),
 	})

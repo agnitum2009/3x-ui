@@ -534,6 +534,7 @@ export function useClients() {
       upSpeedLimit: base.upSpeedLimit || 0,
       downSpeedLimit: base.downSpeedLimit || base.speedLimit || 0,
       speedLimit: base.downSpeedLimit || base.speedLimit || 0,
+      sessionLimit: base.sessionLimit || 0,
       tgId: Number(base.tgId) || 0,
       reset: Number(base.reset) || 0,
       group: base.group || '',

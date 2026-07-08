@@ -9,15 +9,16 @@ func TestClientSpeedLimitRoundTrip(t *testing.T) {
 		LimitIP:        2,
 		UpSpeedLimit:   524288,
 		DownSpeedLimit: 1048576,
+		SessionLimit:   128,
 	}
 
 	rec := c.ToRecord()
-	if rec.UpSpeedLimit != c.UpSpeedLimit || rec.DownSpeedLimit != c.DownSpeedLimit || rec.SpeedLimit != c.DownSpeedLimit {
+	if rec.UpSpeedLimit != c.UpSpeedLimit || rec.DownSpeedLimit != c.DownSpeedLimit || rec.SpeedLimit != c.DownSpeedLimit || rec.SessionLimit != c.SessionLimit {
 		t.Fatalf("ToRecord speed limits up=%d down=%d legacy=%d, want up=%d down=%d", rec.UpSpeedLimit, rec.DownSpeedLimit, rec.SpeedLimit, c.UpSpeedLimit, c.DownSpeedLimit)
 	}
 
 	got := rec.ToClient()
-	if got.UpSpeedLimit != c.UpSpeedLimit || got.DownSpeedLimit != c.DownSpeedLimit || got.SpeedLimit != c.DownSpeedLimit {
+	if got.UpSpeedLimit != c.UpSpeedLimit || got.DownSpeedLimit != c.DownSpeedLimit || got.SpeedLimit != c.DownSpeedLimit || got.SessionLimit != c.SessionLimit {
 		t.Fatalf("ToClient speed limits up=%d down=%d legacy=%d, want up=%d down=%d", got.UpSpeedLimit, got.DownSpeedLimit, got.SpeedLimit, c.UpSpeedLimit, c.DownSpeedLimit)
 	}
 }
@@ -57,5 +58,24 @@ func TestMergeClientRecordDirectionalSpeedLimitPreservesNonZero(t *testing.T) {
 	}
 	if len(conflicts) < 2 || conflicts[len(conflicts)-2].Field != "upSpeedLimit" || conflicts[len(conflicts)-1].Field != "downSpeedLimit" {
 		t.Fatalf("directional speed limit conflicts not recorded: %#v", conflicts)
+	}
+}
+
+func TestMergeClientRecordSessionLimitPreservesNonZero(t *testing.T) {
+	existing := &ClientRecord{Email: "session@example.test", SessionLimit: 64, UpdatedAt: 100}
+	incomingEmpty := &ClientRecord{Email: "session@example.test", UpdatedAt: 200}
+
+	MergeClientRecord(existing, incomingEmpty)
+	if existing.SessionLimit != 64 {
+		t.Fatalf("empty incoming wiped SessionLimit: %d", existing.SessionLimit)
+	}
+
+	incomingHigher := &ClientRecord{Email: "session@example.test", SessionLimit: 128, UpdatedAt: 300}
+	conflicts := MergeClientRecord(existing, incomingHigher)
+	if existing.SessionLimit != 128 {
+		t.Fatalf("higher incoming SessionLimit not applied: %d", existing.SessionLimit)
+	}
+	if len(conflicts) == 0 || conflicts[len(conflicts)-1].Field != "sessionLimit" {
+		t.Fatalf("sessionLimit conflict not recorded: %#v", conflicts)
 	}
 }

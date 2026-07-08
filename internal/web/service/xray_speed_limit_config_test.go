@@ -44,6 +44,7 @@ func TestGetXrayConfigEmitsDirectionalSpeedAndDeviceLimit(t *testing.T) {
 			LimitIP:        3,
 			UpSpeedLimit:   524288,
 			DownSpeedLimit: 1048576,
+			SessionLimit:   128,
 		}}),
 	}
 	if err := database.GetDB().Create(in).Error; err != nil {
@@ -56,6 +57,7 @@ func TestGetXrayConfigEmitsDirectionalSpeedAndDeviceLimit(t *testing.T) {
 		LimitIP:        3,
 		UpSpeedLimit:   524288,
 		DownSpeedLimit: 1048576,
+		SessionLimit:   128,
 	}}); err != nil {
 		t.Fatalf("SyncInbound: %v", err)
 	}
@@ -80,5 +82,8 @@ func TestGetXrayConfigEmitsDirectionalSpeedAndDeviceLimit(t *testing.T) {
 	}
 	if client["deviceLimit"] != float64(3) {
 		t.Fatalf("deviceLimit = %v, want 3", client["deviceLimit"])
+	}
+	if client["sessionLimit"] != float64(128) {
+		t.Fatalf("sessionLimit = %v, want 128", client["sessionLimit"])
 	}
 }

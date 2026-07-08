@@ -704,6 +704,7 @@ type Client struct {
 	SpeedLimit     uint64         `json:"speedLimit" form:"speedLimit"`         // Legacy per-client speed limit in bytes/s; treated as downlink when directional fields are absent
 	UpSpeedLimit   uint64         `json:"upSpeedLimit" form:"upSpeedLimit"`     // Client upload / server inbound limit in bytes/s; 0 means unlimited
 	DownSpeedLimit uint64         `json:"downSpeedLimit" form:"downSpeedLimit"` // Client download / server outbound limit in bytes/s; 0 means unlimited
+	SessionLimit   uint32         `json:"sessionLimit" form:"sessionLimit"`     // Concurrent session/connection limit; 0 means unlimited
 	TotalGB        int64          `json:"totalGB" form:"totalGB"`               // Total traffic limit in GB
 	ExpiryTime     int64          `json:"expiryTime" form:"expiryTime"`         // Expiration timestamp
 	Enable         bool           `json:"enable" form:"enable"`                 // Whether the client is enabled
@@ -737,6 +738,7 @@ type ClientRecord struct {
 	SpeedLimit     uint64 `json:"speedLimit" gorm:"column:speed_limit;default:0"`
 	UpSpeedLimit   uint64 `json:"upSpeedLimit" gorm:"column:up_speed_limit;default:0"`
 	DownSpeedLimit uint64 `json:"downSpeedLimit" gorm:"column:down_speed_limit;default:0"`
+	SessionLimit   uint32 `json:"sessionLimit" gorm:"column:session_limit;default:0"`
 	TotalGB        int64  `json:"totalGB" gorm:"column:total_gb"`
 	ExpiryTime     int64  `json:"expiryTime" gorm:"column:expiry_time"`
 	Enable         bool   `json:"enable" gorm:"default:true"`
@@ -911,6 +913,7 @@ func (c *Client) ToRecord() *ClientRecord {
 		SpeedLimit:     downSpeedLimit,
 		UpSpeedLimit:   c.UpSpeedLimit,
 		DownSpeedLimit: downSpeedLimit,
+		SessionLimit:   c.SessionLimit,
 		TotalGB:        c.TotalGB,
 		ExpiryTime:     c.ExpiryTime,
 		Enable:         c.Enable,
@@ -971,6 +974,7 @@ func (r *ClientRecord) ToClient() *Client {
 		SpeedLimit:     downSpeedLimit,
 		UpSpeedLimit:   r.UpSpeedLimit,
 		DownSpeedLimit: downSpeedLimit,
+		SessionLimit:   r.SessionLimit,
 		TotalGB:        r.TotalGB,
 		ExpiryTime:     r.ExpiryTime,
 		Enable:         r.Enable,
@@ -1132,6 +1136,16 @@ func MergeClientRecord(existing *ClientRecord, incoming *ClientRecord) []ClientM
 			keep("downSpeedLimit", existing.DownSpeedLimit, incoming.DownSpeedLimit, picked)
 			existing.DownSpeedLimit = picked
 			existing.SpeedLimit = picked
+		}
+	}
+	if existing.SessionLimit != incoming.SessionLimit && incoming.SessionLimit != 0 {
+		picked := existing.SessionLimit
+		if existing.SessionLimit == 0 || incoming.SessionLimit > existing.SessionLimit {
+			picked = incoming.SessionLimit
+		}
+		if picked != existing.SessionLimit {
+			keep("sessionLimit", existing.SessionLimit, incoming.SessionLimit, picked)
+			existing.SessionLimit = picked
 		}
 	}
 	if existing.TgID != incoming.TgID && incoming.TgID != 0 {

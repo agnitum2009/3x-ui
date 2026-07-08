@@ -110,6 +110,7 @@ interface FormState {
   limitIp: number;
   upSpeedLimit: number;
   downSpeedLimit: number;
+  sessionLimit: number;
   tgId: number;
   group: string;
   comment: string;
@@ -142,6 +143,7 @@ function emptyForm(): FormState {
     limitIp: 0,
     upSpeedLimit: 0,
     downSpeedLimit: 0,
+    sessionLimit: 0,
     tgId: 0,
     group: '',
     comment: '',
@@ -212,6 +214,11 @@ export default function ClientFormModal({
     update(key, SizeFormatter.normalizeSpeedLimitMBps(value));
   }
 
+  function normalizeSessionLimit(value: number | string | null | undefined): number {
+    const n = Number(value);
+    return Number.isInteger(n) && n >= 0 && n <= 10000 ? n : 0;
+  }
+
   function addExternalLinkRow(kind: 'link' | 'subscription') {
     setForm((prev) => ({
       ...prev,
@@ -254,6 +261,7 @@ export default function ClientFormModal({
         limitIp: client.limitIp || 0,
         upSpeedLimit: SizeFormatter.speedBytesToMBps(client.upSpeedLimit || 0),
         downSpeedLimit: SizeFormatter.speedBytesToMBps(client.downSpeedLimit || client.speedLimit || 0),
+        sessionLimit: Number(client.sessionLimit) || 0,
         tgId: Number(client.tgId) || 0,
         group: client.group || '',
         comment: client.comment || '',
@@ -503,6 +511,7 @@ export default function ClientFormModal({
       limitIp: form.limitIp,
       upSpeedLimit,
       downSpeedLimit,
+      sessionLimit: normalizeSessionLimit(form.sessionLimit),
       tgId: form.tgId,
       group: form.group,
       comment: form.comment,
@@ -532,6 +541,7 @@ export default function ClientFormModal({
       upSpeedLimit: SizeFormatter.speedMBpsToBytes(upSpeedLimit),
       downSpeedLimit: SizeFormatter.speedMBpsToBytes(downSpeedLimit),
       speedLimit: SizeFormatter.speedMBpsToBytes(downSpeedLimit),
+      sessionLimit: normalizeSessionLimit(form.sessionLimit),
       tgId: Number(form.tgId) || 0,
       group: form.group,
       comment: form.comment,
@@ -682,6 +692,15 @@ export default function ClientFormModal({
                             formatter={(value) => String(SizeFormatter.normalizeSpeedLimitMBps(value))}
                             onChange={(v) => updateSpeedLimit('downSpeedLimit', v)}
                             onBlur={() => updateSpeedLimit('downSpeedLimit', form.downSpeedLimit)} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={4}>
+                        <Form.Item label={t('pages.clients.sessionLimit')} tooltip={t('pages.clients.sessionLimitDesc')}>
+                          <InputNumber<number> value={form.sessionLimit} min={0} max={10000} step={1} precision={0} style={{ width: '100%' }}
+                            parser={(value) => normalizeSessionLimit(value)}
+                            formatter={(value) => String(normalizeSessionLimit(value))}
+                            onChange={(v) => update('sessionLimit', normalizeSessionLimit(v))}
+                            onBlur={() => update('sessionLimit', normalizeSessionLimit(form.sessionLimit))} />
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={4}>

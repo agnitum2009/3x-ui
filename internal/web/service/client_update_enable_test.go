@@ -171,18 +171,37 @@ func TestUpdate_PersistsDirectionalSpeedLimits(t *testing.T) {
 	updated := rec.ToClient()
 	updated.UpSpeedLimit = 5 * 1024 * 1024
 	updated.DownSpeedLimit = 10 * 1024 * 1024
+	updated.SessionLimit = 128
 	if _, err := svc.Update(inboundSvc, rec.Id, *updated); err != nil {
 		t.Fatalf("Update set speed: %v", err)
 	}
 	assertSpeedLimits(t, svc, inboundSvc, ib.Id, email, updated.UpSpeedLimit, updated.DownSpeedLimit)
+	assertSessionLimit(t, svc, inboundSvc, ib.Id, email, 128)
 
 	updated.UpSpeedLimit = 0
 	updated.DownSpeedLimit = 0
 	updated.SpeedLimit = 0
+	updated.SessionLimit = 0
 	if _, err := svc.Update(inboundSvc, rec.Id, *updated); err != nil {
 		t.Fatalf("Update clear speed: %v", err)
 	}
 	assertSpeedLimits(t, svc, inboundSvc, ib.Id, email, 0, 0)
+	assertSessionLimit(t, svc, inboundSvc, ib.Id, email, 0)
+}
+
+func assertSessionLimit(t *testing.T, svc *ClientService, inboundSvc *InboundService, inboundId int, email string, want uint32) {
+	t.Helper()
+	rec, err := svc.GetRecordByEmail(nil, email)
+	if err != nil {
+		t.Fatalf("GetRecordByEmail(%q): %v", email, err)
+	}
+	if rec.SessionLimit != want {
+		t.Fatalf("record sessionLimit=%d, want %d", rec.SessionLimit, want)
+	}
+	c := jsonClientByEmail(t, inboundSvc, inboundId, email)
+	if c.SessionLimit != want {
+		t.Fatalf("inbound JSON sessionLimit=%d, want %d", c.SessionLimit, want)
+	}
 }
 
 func assertSpeedLimits(t *testing.T, svc *ClientService, inboundSvc *InboundService, inboundId int, email string, wantUp, wantDown uint64) {

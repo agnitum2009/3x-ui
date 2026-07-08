@@ -246,6 +246,7 @@ export interface Client {
   reverse?: ClientReverse | null;
   secret?: string;
   security: string;
+  sessionLimit: number;
   speedLimit: number;
   subId: string;
   tgId: number;
@@ -284,6 +285,7 @@ export interface ClientRecord {
   reverse: unknown;
   secret: string;
   security: string;
+  sessionLimit: number;
   speedLimit: number;
   subId: string;
   tgId: number;

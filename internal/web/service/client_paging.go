@@ -24,6 +24,7 @@ type ClientSlim struct {
 	SpeedLimit     uint64              `json:"speedLimit"`
 	UpSpeedLimit   uint64              `json:"upSpeedLimit"`
 	DownSpeedLimit uint64              `json:"downSpeedLimit"`
+	SessionLimit   uint32              `json:"sessionLimit"`
 	Reset          int                 `json:"reset"`
 	Group          string              `json:"group,omitempty"`
 	Comment        string              `json:"comment,omitempty"`
@@ -276,6 +277,7 @@ func toClientSlim(c ClientWithAttachments) ClientSlim {
 		SpeedLimit:     c.SpeedLimit,
 		UpSpeedLimit:   c.UpSpeedLimit,
 		DownSpeedLimit: c.DownSpeedLimit,
+		SessionLimit:   c.SessionLimit,
 		Reset:          c.Reset,
 		Group:          c.Group,
 		Comment:        c.Comment,
