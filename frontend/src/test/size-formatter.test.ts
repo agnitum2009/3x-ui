@@ -64,4 +64,27 @@ describe('SizeFormatter speed MB/s helpers', () => {
   it('formats configured speed limits as MB/s, not Mbps', () => {
     expect(SizeFormatter.speedMBpsFormat(10 * 1024 * 1024)).toBe('10.0 MB/s');
   });
+
+  it('normalizes invalid configured speed input back to default zero', () => {
+    expect(SizeFormatter.normalizeSpeedLimitMBps(null)).toBe(0);
+    expect(SizeFormatter.normalizeSpeedLimitMBps(NaN)).toBe(0);
+    expect(SizeFormatter.normalizeSpeedLimitMBps(-1)).toBe(0);
+    expect(SizeFormatter.normalizeSpeedLimitMBps(1000.1)).toBe(0);
+    expect(SizeFormatter.normalizeSpeedLimitMBps(1.25)).toBe(0);
+    expect(SizeFormatter.normalizeSpeedLimitMBps(1.2)).toBe(1.2);
+  });
+
+  it('parses illegal speed text as zero', () => {
+    expect(SizeFormatter.parseSpeedLimitMBpsInput(undefined)).toBe(0);
+    expect(SizeFormatter.parseSpeedLimitMBpsInput('abc')).toBe(0);
+    expect(SizeFormatter.parseSpeedLimitMBpsInput('-1')).toBe(0);
+    expect(SizeFormatter.parseSpeedLimitMBpsInput('1000.1')).toBe(0);
+    expect(SizeFormatter.parseSpeedLimitMBpsInput('1.25')).toBe(0);
+    expect(SizeFormatter.parseSpeedLimitMBpsInput('1,2')).toBe(1.2);
+  });
+
+  it('converts invalid configured MB/s values to zero bytes', () => {
+    expect(SizeFormatter.speedMBpsToBytes(1000.1)).toBe(0);
+    expect(SizeFormatter.speedMBpsToBytes(1.25)).toBe(0);
+  });
 });

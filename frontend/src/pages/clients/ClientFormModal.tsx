@@ -208,6 +208,10 @@ export default function ClientFormModal({
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function updateSpeedLimit(key: 'upSpeedLimit' | 'downSpeedLimit', value: number | string | null | undefined) {
+    update(key, SizeFormatter.normalizeSpeedLimitMBps(value));
+  }
+
   function addExternalLinkRow(kind: 'link' | 'subscription') {
     setForm((prev) => ({
       ...prev,
@@ -481,6 +485,8 @@ export default function ClientFormModal({
 
   async function onSubmit() {
     const schema = isEdit ? ClientFormSchema : ClientCreateFormSchema;
+    const upSpeedLimit = SizeFormatter.normalizeSpeedLimitMBps(form.upSpeedLimit);
+    const downSpeedLimit = SizeFormatter.normalizeSpeedLimitMBps(form.downSpeedLimit);
     const validated = schema.safeParse({
       email: form.email,
       subId: form.subId,
@@ -495,8 +501,8 @@ export default function ClientFormModal({
       delayedDays: form.delayedDays,
       reset: form.reset,
       limitIp: form.limitIp,
-      upSpeedLimit: form.upSpeedLimit,
-      downSpeedLimit: form.downSpeedLimit,
+      upSpeedLimit,
+      downSpeedLimit,
       tgId: form.tgId,
       group: form.group,
       comment: form.comment,
@@ -523,9 +529,9 @@ export default function ClientFormModal({
       expiryTime,
       reset: Number(form.reset) || 0,
       limitIp: Number(form.limitIp) || 0,
-      upSpeedLimit: SizeFormatter.speedMBpsToBytes(form.upSpeedLimit),
-      downSpeedLimit: SizeFormatter.speedMBpsToBytes(form.downSpeedLimit),
-      speedLimit: SizeFormatter.speedMBpsToBytes(form.downSpeedLimit),
+      upSpeedLimit: SizeFormatter.speedMBpsToBytes(upSpeedLimit),
+      downSpeedLimit: SizeFormatter.speedMBpsToBytes(downSpeedLimit),
+      speedLimit: SizeFormatter.speedMBpsToBytes(downSpeedLimit),
       tgId: Number(form.tgId) || 0,
       group: form.group,
       comment: form.comment,
@@ -662,14 +668,20 @@ export default function ClientFormModal({
                       </Col>
                       <Col xs={24} md={4}>
                         <Form.Item label={t('pages.clients.upSpeedLimit')} tooltip={t('pages.clients.upSpeedLimitDesc')}>
-                          <InputNumber value={form.upSpeedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
-                            onChange={(v) => update('upSpeedLimit', Number(v) || 0)} />
+                          <InputNumber<number> value={form.upSpeedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
+                            parser={SizeFormatter.parseSpeedLimitMBpsInput}
+                            formatter={(value) => String(SizeFormatter.normalizeSpeedLimitMBps(value))}
+                            onChange={(v) => updateSpeedLimit('upSpeedLimit', v)}
+                            onBlur={() => updateSpeedLimit('upSpeedLimit', form.upSpeedLimit)} />
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={4}>
                         <Form.Item label={t('pages.clients.downSpeedLimit')} tooltip={t('pages.clients.downSpeedLimitDesc')}>
-                          <InputNumber value={form.downSpeedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
-                            onChange={(v) => update('downSpeedLimit', Number(v) || 0)} />
+                          <InputNumber<number> value={form.downSpeedLimit} min={0} max={1000} step={0.1} precision={1} style={{ width: '100%' }}
+                            parser={SizeFormatter.parseSpeedLimitMBpsInput}
+                            formatter={(value) => String(SizeFormatter.normalizeSpeedLimitMBps(value))}
+                            onChange={(v) => updateSpeedLimit('downSpeedLimit', v)}
+                            onBlur={() => updateSpeedLimit('downSpeedLimit', form.downSpeedLimit)} />
                         </Form.Item>
                       </Col>
                       <Col xs={24} md={4}>

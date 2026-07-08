@@ -674,9 +674,22 @@ export class SizeFormatter {
     return Math.round((bps / SizeFormatter.ONE_MB) * 10) / 10;
   }
 
+  static normalizeSpeedLimitMBps(value: number | string | null | undefined): number {
+    const numberValue = typeof value === 'string' ? Number(value.trim().replace(',', '.')) : Number(value);
+    if (!Number.isFinite(numberValue) || numberValue < 0 || numberValue > 1000) return 0;
+    const rounded = Math.round(numberValue * 10) / 10;
+    return Math.abs(numberValue - rounded) < Number.EPSILON ? rounded : 0;
+  }
+
+  static parseSpeedLimitMBpsInput(value: string | undefined): number {
+    const normalized = (value ?? '').trim().replace(',', '.');
+    if (!/^\d+(?:\.\d?)?$/.test(normalized)) return 0;
+    return SizeFormatter.normalizeSpeedLimitMBps(normalized);
+  }
+
   static speedMBpsToBytes(mbps: number | null | undefined): number {
-    if (mbps == null || !Number.isFinite(mbps) || mbps <= 0) return 0;
-    return Math.round(mbps * SizeFormatter.ONE_MB);
+    const normalized = SizeFormatter.normalizeSpeedLimitMBps(mbps);
+    return normalized <= 0 ? 0 : Math.round(normalized * SizeFormatter.ONE_MB);
   }
 
   static speedMBpsFormat(bps: number | null | undefined): string {
