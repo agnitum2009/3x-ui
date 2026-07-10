@@ -413,26 +413,29 @@ describe('resolveAddr precedence', () => {
   });
 });
 
-// #4829: reaching the panel through an SSH tunnel (127.0.0.1/localhost) must not
-// leak the loopback host into share/QR links; a configured public host wins.
-describe('preferPublicHost (loopback fallback)', () => {
-  it('keeps a routable browser host as-is even when a public host is configured', () => {
-    expect(preferPublicHost('panel.example.com', 'sub.example.com')).toBe('panel.example.com');
-    expect(preferPublicHost('203.0.113.7', 'sub.example.com')).toBe('203.0.113.7');
-  });
-
-  it('substitutes the public host for loopback browser hosts', () => {
-    for (const loop of ['127.0.0.1', 'localhost', '::1', '[::1]', '127.5.6.7']) {
-      expect(preferPublicHost(loop, 'sub.example.com')).toBe('sub.example.com');
+// The browser host is only the fallback. It may be localhost or a private
+// management address that external clients cannot reach.
+describe('preferPublicHost', () => {
+  it('uses the configured public host for every browser address', () => {
+    for (const browserHost of ['localhost', '127.0.0.1', '192.168.1.10', 'panel.internal']) {
+      expect(preferPublicHost(browserHost, 'sub.example.com')).toBe('sub.example.com');
     }
   });
 
-  it('leaves loopback untouched when no public host is configured', () => {
+  it('uses the browser host when no public host is configured', () => {
     expect(preferPublicHost('127.0.0.1', '')).toBe('127.0.0.1');
-    expect(preferPublicHost('localhost', '')).toBe('localhost');
+    expect(preferPublicHost('192.168.1.10', '   ')).toBe('192.168.1.10');
   });
 
-  it('an explicit per-inbound listen still wins over the loopback fallback', () => {
+  it('keeps a private management address out of the effective share host', () => {
+    expect(resolveAddr(
+      { listen: '0.0.0.0' } as never,
+      '',
+      preferPublicHost('192.168.1.10', 'vpn.example.com'),
+    )).toBe('vpn.example.com');
+  });
+
+  it('an explicit per-inbound listen still wins over the configured fallback', () => {
     const inbound = { listen: '203.0.113.9', port: 443, protocol: 'vless' as const };
     expect(resolveAddr(
       inbound as never,
