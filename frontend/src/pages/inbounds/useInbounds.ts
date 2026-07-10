@@ -22,8 +22,8 @@ export interface SubSettings {
   subJsonURI: string;
   subJsonEnable: boolean;
   // Configured public host (Sub Domain, else Web Domain) used as the share/QR
-  // link host when the panel is reached on a loopback address. Empty if neither
-  // is set.
+  // fallback instead of the browser's possibly private management address.
+  // Empty if neither is set.
   publicHost: string;
 }
 

@@ -1027,20 +1027,13 @@ export function resolveAddr(inbound: Inbound, hostOverride: string, fallbackHost
   return resolveShareHost(inbound, hostOverride, fallbackHostname);
 }
 
-// A loopback browser host means the panel was reached through a tunnel (e.g.
-// SSH-forwarded 127.0.0.1/localhost), so it can never be a shareable link host.
-function isLoopbackHost(host: string): boolean {
-  const h = host.trim().replace(/^\[|\]$/g, '').toLowerCase();
-  return h === 'localhost' || h === '::1' || h.startsWith('127.');
-}
-
 // preferPublicHost is the browser-side analog of the backend's
-// configuredPublicHost: when the panel is reached on a loopback host, prefer a
-// configured public host (Sub/Web Domain) for share/QR links instead of leaking
-// localhost. An explicit per-inbound listen or node override still wins, since
-// resolveAddr only reaches the fallbackHostname after those.
+// configuredPublicHost: an explicitly configured Sub/Web Domain is the admin's
+// public endpoint and must win over the browser host, which may be localhost or
+// a private management address. An explicit per-inbound listen/node/custom
+// strategy still wins because resolveAddr reaches fallbackHostname last.
 export function preferPublicHost(browserHost: string, publicHost: string): string {
-  return publicHost && isLoopbackHost(browserHost) ? publicHost : browserHost;
+  return publicHost.trim() || browserHost;
 }
 
 // Returns the client array for protocols that have one. SS returns its
