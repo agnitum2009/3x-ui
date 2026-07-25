@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
@@ -21,6 +22,9 @@ type ClientSlim struct {
 	TotalGB    int64               `json:"totalGB"`
 	ExpiryTime int64               `json:"expiryTime"`
 	LimitIP    int                 `json:"limitIp"`
+	UpSpeedLimit   uint64 `json:"upSpeedLimit"`
+	DownSpeedLimit uint64 `json:"downSpeedLimit"`
+	SessionLimit   uint32 `json:"sessionLimit"`
 	Reset      int                 `json:"reset"`
 	Group      string              `json:"group,omitempty"`
 	Comment    string              `json:"comment,omitempty"`
@@ -270,6 +274,11 @@ func toClientSlim(c ClientWithAttachments) ClientSlim {
 		TotalGB:    c.TotalGB,
 		ExpiryTime: c.ExpiryTime,
 		LimitIP:    c.LimitIP,
+		// Resolve the downlink via the shared fallback so the list shows the same
+		// effective downlink limit the core enforces (legacy SpeedLimit included).
+		UpSpeedLimit:   c.UpSpeedLimit,
+		DownSpeedLimit: model.DownSpeedLimitFromRecord(&c.ClientRecord),
+		SessionLimit:   c.SessionLimit,
 		Reset:      c.Reset,
 		Group:      c.Group,
 		Comment:    c.Comment,

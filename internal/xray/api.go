@@ -85,6 +85,48 @@ func getOptionalUserString(user map[string]any, key string) (string, error) {
 	return strValue, nil
 }
 
+// getOptionalUserUint64 reads an optional numeric user field. JSON decoding
+// yields float64 for numbers, so accept any integer/float kind and reject
+// negative values. Missing/nil fields report 0 with no error.
+func getOptionalUserUint64(user map[string]any, key string) (uint64, error) {
+	value, ok := user[key]
+	if !ok || value == nil {
+		return 0, nil
+	}
+	switch v := value.(type) {
+	case float64:
+		if v < 0 {
+			return 0, fmt.Errorf("invalid numeric user field %q: %v is negative", key, v)
+		}
+		return uint64(v), nil
+	case float32:
+		if v < 0 {
+			return 0, fmt.Errorf("invalid numeric user field %q: %v is negative", key, v)
+		}
+		return uint64(v), nil
+	case int:
+		if v < 0 {
+			return 0, fmt.Errorf("invalid numeric user field %q: %v is negative", key, v)
+		}
+		return uint64(v), nil
+	case int64:
+		if v < 0 {
+			return 0, fmt.Errorf("invalid numeric user field %q: %v is negative", key, v)
+		}
+		return uint64(v), nil
+	case uint64:
+		return v, nil
+	case json.Number:
+		n, err := v.Int64()
+		if err != nil || n < 0 {
+			return 0, fmt.Errorf("invalid numeric user field %q: %v", key, v)
+		}
+		return uint64(n), nil
+	default:
+		return 0, fmt.Errorf("invalid type for user field %q: %T", key, value)
+	}
+}
+
 // Init connects to the Xray API server and initializes handler and stats service clients.
 func (x *XrayAPI) Init(apiPort int) error {
 	if apiPort <= 0 || apiPort > math.MaxUint16 {
@@ -619,6 +661,40 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 	if x.HandlerServiceClient == nil {
 		return common.NewError("xray HandlerServiceClient is not initialized")
 	}
+
+	// Per-client limits (custom fork): read the numeric fields the panel emits
+	// into the inbound settings JSON. DownSpeedLimit falls back to the legacy
+	// speedLimit so configs produced before the up/down split still throttle.
+	speedLimit, err := getOptionalUserUint64(user, "speedLimit")
+	if err != nil {
+		return err
+	}
+	upSpeedLimit, err := getOptionalUserUint64(user, "upSpeedLimit")
+	if err != nil {
+		return err
+	}
+	downSpeedLimit, err := getOptionalUserUint64(user, "downSpeedLimit")
+	if err != nil {
+		return err
+	}
+	if downSpeedLimit == 0 {
+		downSpeedLimit = speedLimit
+	}
+	deviceLimit64, err := getOptionalUserUint64(user, "deviceLimit")
+	if err != nil {
+		return err
+	}
+	if deviceLimit64 > math.MaxUint32 {
+		return fmt.Errorf("invalid numeric user field %q: %d overflows uint32", "deviceLimit", deviceLimit64)
+	}
+	sessionLimit64, err := getOptionalUserUint64(user, "sessionLimit")
+	if err != nil {
+		return err
+	}
+	if sessionLimit64 > math.MaxUint32 {
+		return fmt.Errorf("invalid numeric user field %q: %d overflows uint32", "sessionLimit", sessionLimit64)
+	}
+
 	client := *x.HandlerServiceClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), handlerRPCTimeout)
@@ -627,8 +703,13 @@ func (x *XrayAPI) AddUser(Protocol string, inboundTag string, user map[string]an
 		Tag: inboundTag,
 		Operation: serial.ToTypedMessage(&command.AddUserOperation{
 			User: &protocol.User{
-				Email:   userEmail,
-				Account: account,
+				Email:          userEmail,
+				Account:        account,
+				SpeedLimit:     downSpeedLimit,
+				UpSpeedLimit:   upSpeedLimit,
+				DownSpeedLimit: downSpeedLimit,
+				DeviceLimit:    uint32(deviceLimit64),
+				SessionLimit:   uint32(sessionLimit64),
 			},
 		}),
 	})

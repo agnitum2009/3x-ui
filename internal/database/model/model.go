@@ -368,6 +368,21 @@ func WireguardPeerFromClient(c Client) map[string]any {
 	if c.KeepAlive > 0 {
 		peer["keepAlive"] = c.KeepAlive
 	}
+	// Mirror the per-client limits emitted for other protocols so the custom
+	// fork applies directional speed and session caps to WireGuard peers too.
+	if c.UpSpeedLimit > 0 {
+		peer["upSpeedLimit"] = c.UpSpeedLimit
+	}
+	if c.DownSpeedLimit > 0 {
+		peer["downSpeedLimit"] = c.DownSpeedLimit
+		peer["speedLimit"] = c.DownSpeedLimit
+	}
+	if c.LimitIP > 0 {
+		peer["deviceLimit"] = c.LimitIP
+	}
+	if c.SessionLimit > 0 {
+		peer["sessionLimit"] = c.SessionLimit
+	}
 	return peer
 }
 
@@ -812,6 +827,9 @@ type Client struct {
 	Email        string         `json:"email"`                        // Client email identifier
 	LimitIP      int            `json:"limitIp"`                      // IP limit for this client
 	TotalGB      int64          `json:"totalGB" form:"totalGB"`       // Total traffic limit in GB
+	UpSpeedLimit   uint64 `json:"upSpeedLimit,omitempty" form:"upSpeedLimit"`   // Client upload / server inbound limit in bytes/s; 0 means unlimited
+	DownSpeedLimit uint64 `json:"downSpeedLimit,omitempty" form:"downSpeedLimit"` // Client download / server outbound limit in bytes/s; 0 means unlimited
+	SessionLimit   uint32 `json:"sessionLimit,omitempty" form:"sessionLimit"`   // Concurrent session/connection limit; 0 means unlimited
 	ExpiryTime   int64          `json:"expiryTime" form:"expiryTime"` // Expiration timestamp
 	Enable       bool           `json:"enable" form:"enable"`         // Whether the client is enabled
 	TgID         int64          `json:"tgId" form:"tgId"`             // Telegram user ID for notifications
@@ -842,6 +860,13 @@ type ClientRecord struct {
 	AdTag        string `json:"adTag" gorm:"column:ad_tag;default:''"`
 	LimitIP      int    `json:"limitIp" gorm:"column:limit_ip"`
 	TotalGB      int64  `json:"totalGB" gorm:"column:total_gb"`
+	// SpeedLimit is the legacy downlink limit column. It mirrors DownSpeedLimit
+	// (with DownSpeedLimit falling back to the legacy value when it is 0) so the
+	// projection stays compatible with unpatched cores that only read "speedLimit".
+	SpeedLimit     uint64 `json:"speedLimit" gorm:"column:speed_limit;default:0"`
+	UpSpeedLimit   uint64 `json:"upSpeedLimit" gorm:"column:up_speed_limit;default:0"`
+	DownSpeedLimit uint64 `json:"downSpeedLimit" gorm:"column:down_speed_limit;default:0"`
+	SessionLimit   uint32 `json:"sessionLimit" gorm:"column:session_limit;default:0"`
 	ExpiryTime   int64  `json:"expiryTime" gorm:"column:expiry_time"`
 	Enable       bool   `json:"enable" gorm:"default:true"`
 	TgID         int64  `json:"tgId" gorm:"column:tg_id"`
@@ -1006,14 +1031,20 @@ func (c *Client) ToRecord() *ClientRecord {
 		Security:   c.Security,
 		LimitIP:    c.LimitIP,
 		TotalGB:    c.TotalGB,
-		ExpiryTime: c.ExpiryTime,
-		Enable:     c.Enable,
-		TgID:       c.TgID,
-		Group:      c.Group,
-		Comment:    c.Comment,
-		Reset:      c.Reset,
-		CreatedAt:  c.CreatedAt,
-		UpdatedAt:  c.UpdatedAt,
+		// SpeedLimit mirrors DownSpeedLimit so the legacy column keeps acting as
+		// the downlink limit for unpatched cores and old API projections.
+		SpeedLimit:     c.DownSpeedLimit,
+		UpSpeedLimit:   c.UpSpeedLimit,
+		DownSpeedLimit: c.DownSpeedLimit,
+		SessionLimit:   c.SessionLimit,
+		ExpiryTime:     c.ExpiryTime,
+		Enable:         c.Enable,
+		TgID:           c.TgID,
+		Group:          c.Group,
+		Comment:        c.Comment,
+		Reset:          c.Reset,
+		CreatedAt:      c.CreatedAt,
+		UpdatedAt:      c.UpdatedAt,
 
 		PrivateKey:   c.PrivateKey,
 		PublicKey:    c.PublicKey,
@@ -1059,14 +1090,19 @@ func (r *ClientRecord) ToClient() *Client {
 		Security:   r.Security,
 		LimitIP:    r.LimitIP,
 		TotalGB:    r.TotalGB,
-		ExpiryTime: r.ExpiryTime,
-		Enable:     r.Enable,
-		TgID:       r.TgID,
-		Group:      r.Group,
-		Comment:    r.Comment,
-		Reset:      r.Reset,
-		CreatedAt:  r.CreatedAt,
-		UpdatedAt:  r.UpdatedAt,
+		// DownSpeedLimit falls back to the legacy SpeedLimit column so clients
+		// stored before the up/down split still surface a downlink limit.
+		DownSpeedLimit: DownSpeedLimitFromRecord(r),
+		UpSpeedLimit:   r.UpSpeedLimit,
+		SessionLimit:   r.SessionLimit,
+		ExpiryTime:     r.ExpiryTime,
+		Enable:         r.Enable,
+		TgID:           r.TgID,
+		Group:          r.Group,
+		Comment:        r.Comment,
+		Reset:          r.Reset,
+		CreatedAt:      r.CreatedAt,
+		UpdatedAt:      r.UpdatedAt,
 
 		PrivateKey:   r.PrivateKey,
 		PublicKey:    r.PublicKey,
@@ -1083,6 +1119,18 @@ func (r *ClientRecord) ToClient() *Client {
 		}
 	}
 	return c
+}
+
+// DownSpeedLimitFromRecord resolves the effective downlink speed limit for a
+// client record, falling back to the legacy SpeedLimit column when the explicit
+// DownSpeedLimit is 0 (unlimited / unset). This fallback is applied consistently
+// wherever the downlink limit is consumed: ToClient, xray config generation, the
+// gRPC AddUser path, and client_crud list-column sync.
+func DownSpeedLimitFromRecord(r *ClientRecord) uint64 {
+	if r.DownSpeedLimit > 0 {
+		return r.DownSpeedLimit
+	}
+	return r.SpeedLimit
 }
 
 type ClientMergeConflict struct {
@@ -1168,6 +1216,48 @@ func MergeClientRecord(existing *ClientRecord, incoming *ClientRecord) []ClientM
 		if picked != existing.TotalGB {
 			keep("totalGB", existing.TotalGB, incoming.TotalGB, picked)
 			existing.TotalGB = picked
+		}
+	}
+	// Speed/session limits: 0 means unlimited, so it yields to any concrete
+	// value; otherwise the larger (more permissive) limit wins, matching the
+	// traffic-limit policy above. DownSpeedLimit also keeps SpeedLimit in sync
+	// since the legacy column mirrors the downlink limit.
+	mergeUint64Limit := func(field string, existingV, incomingV uint64) uint64 {
+		if existingV == incomingV {
+			return existingV
+		}
+		picked := existingV
+		if existingV == 0 || (incomingV != 0 && incomingV > existingV) {
+			picked = incomingV
+		}
+		if picked != existingV {
+			keep(field, existingV, incomingV, picked)
+		}
+		return picked
+	}
+	if existing.SpeedLimit != incoming.SpeedLimit {
+		existing.SpeedLimit = mergeUint64Limit("speedLimit", existing.SpeedLimit, incoming.SpeedLimit)
+	}
+	if existing.UpSpeedLimit != incoming.UpSpeedLimit {
+		existing.UpSpeedLimit = mergeUint64Limit("upSpeedLimit", existing.UpSpeedLimit, incoming.UpSpeedLimit)
+	}
+	if existing.DownSpeedLimit != incoming.DownSpeedLimit {
+		picked := mergeUint64Limit("downSpeedLimit", existing.DownSpeedLimit, incoming.DownSpeedLimit)
+		if picked != existing.DownSpeedLimit {
+			existing.DownSpeedLimit = picked
+			// Keep the legacy downlink-mirror column aligned with DownSpeedLimit.
+			if existing.SpeedLimit != picked {
+				keep("speedLimit", existing.SpeedLimit, incoming.DownSpeedLimit, picked)
+				existing.SpeedLimit = picked
+			}
+		}
+	}
+	if existing.SessionLimit != incoming.SessionLimit {
+		if existing.SessionLimit == 0 || (incoming.SessionLimit != 0 && incoming.SessionLimit > existing.SessionLimit) {
+			if existing.SessionLimit != incoming.SessionLimit {
+				keep("sessionLimit", existing.SessionLimit, incoming.SessionLimit, incoming.SessionLimit)
+				existing.SessionLimit = incoming.SessionLimit
+			}
 		}
 	}
 	if existing.ExpiryTime != incoming.ExpiryTime {

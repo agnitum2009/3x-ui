@@ -472,6 +472,23 @@ func (s *ClientService) Update(inboundSvc *InboundService, id int, updated model
 		return needRestart, err
 	}
 
+	// Keep the speed/session list projection in sync with the inbound settings
+	// JSON. The clients table reads these columns directly for the paged list,
+	// and 0 is a real value (meaning unlimited), so UpdateColumns is required —
+	// a plain save would not persist a zero that clears a previously-set limit.
+	// SpeedLimit mirrors DownSpeedLimit (the legacy downlink column).
+	downSpeedLimit := updated.DownSpeedLimit
+	if err := database.GetDB().Model(&model.ClientRecord{}).
+		Where("id = ?", id).
+		UpdateColumns(map[string]any{
+			"speed_limit":      downSpeedLimit,
+			"up_speed_limit":   updated.UpSpeedLimit,
+			"down_speed_limit": downSpeedLimit,
+			"session_limit":    updated.SessionLimit,
+		}).Error; err != nil {
+		return needRestart, err
+	}
+
 	if err := database.GetDB().Model(&model.ClientRecord{}).
 		Where("id = ?", id).
 		UpdateColumn("updated_at", time.Now().UnixMilli()).Error; err != nil {

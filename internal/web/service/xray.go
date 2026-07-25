@@ -209,6 +209,23 @@ func (s *XrayService) GetXrayConfig() (*xray.Config, error) {
 				wgPeers = append(wgPeers, model.WireguardPeerFromClient(c))
 				continue
 			}
+			// Per-client limits applied uniformly across protocols. The downlink
+			// limit also emits the legacy "speedLimit" key so unpatched cores still
+			// throttle the client; the custom fork additionally reads
+			// upSpeedLimit/downSpeedLimit/sessionLimit for directional + session caps.
+			if c.UpSpeedLimit > 0 {
+				entry["upSpeedLimit"] = c.UpSpeedLimit
+			}
+			if c.DownSpeedLimit > 0 {
+				entry["downSpeedLimit"] = c.DownSpeedLimit
+				entry["speedLimit"] = c.DownSpeedLimit
+			}
+			if c.LimitIP > 0 {
+				entry["deviceLimit"] = c.LimitIP
+			}
+			if c.SessionLimit > 0 {
+				entry["sessionLimit"] = c.SessionLimit
+			}
 			finalClients = append(finalClients, entry)
 		}
 

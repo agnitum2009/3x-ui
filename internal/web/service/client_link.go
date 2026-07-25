@@ -102,6 +102,12 @@ func (s *ClientService) SyncInbound(tx *gorm.DB, inboundId int, clients []model.
 		row.SubID = incoming.SubID
 		row.LimitIP = incoming.LimitIP
 		row.TotalGB = incoming.TotalGB
+		// Speed/session limits overwrite unconditionally, like LimitIP/TotalGB:
+		// 0 means unlimited and is a valid value the editor can set.
+		row.SpeedLimit = incoming.SpeedLimit
+		row.UpSpeedLimit = incoming.UpSpeedLimit
+		row.DownSpeedLimit = incoming.DownSpeedLimit
+		row.SessionLimit = incoming.SessionLimit
 		row.ExpiryTime = incoming.ExpiryTime
 		row.Enable = incoming.Enable
 		row.TgID = incoming.TgID
