@@ -37,7 +37,7 @@ export default function SubscriptionGeneralTab({ allSetting, updateSetting }: Su
               <Input value={allSetting.subListen} onChange={(e) => updateSetting({ subListen: e.target.value })} />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.subDomain')} description={t('pages.settings.subDomainDesc')}>
-              <Input value={allSetting.subDomain} onChange={(e) => updateSetting({ subDomain: e.target.value })} />
+              <Input value={allSetting.subDomain} placeholder="vpn.example.com" onChange={(e) => updateSetting({ subDomain: e.target.value })} />
             </SettingListItem>
             <SettingListItem paddings="small" title={t('pages.settings.subPort')} description={t('pages.settings.subPortDesc')}>
               <InputNumber value={allSetting.subPort} min={1} max={65535} style={{ width: '100%' }}

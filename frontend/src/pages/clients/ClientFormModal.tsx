@@ -24,7 +24,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { FormProvider, useForm, useWatch, useFieldArray } from 'react-hook-form';
 
-import { HttpUtil, RandomUtil, Wireguard } from '@/utils';
+import { HttpUtil, RandomUtil, Wireguard, SizeFormatter, normalizeSessionLimit } from '@/utils';
 import { formatInboundLabel } from '@/lib/inbounds/label';
 import { generateMtprotoSecret } from '@/lib/xray/inbound-defaults';
 import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
@@ -120,6 +120,9 @@ const EMPTY: Values = {
   delayedDays: 0,
   reset: 0,
   limitIp: 0,
+  upSpeedLimit: 0,
+  downSpeedLimit: 0,
+  sessionLimit: 0,
   tgId: 0,
   group: '',
   comment: '',
@@ -224,6 +227,9 @@ export default function ClientFormModal({
         totalGB: bytesToGB(client.totalGB || 0),
         reset: Number(client.reset) || 0,
         limitIp: client.limitIp || 0,
+        upSpeedLimit: SizeFormatter.speedBytesToMBps(client.upSpeedLimit),
+        downSpeedLimit: SizeFormatter.speedBytesToMBps(client.downSpeedLimit),
+        sessionLimit: normalizeSessionLimit(client.sessionLimit),
         tgId: Number(client.tgId) || 0,
         group: client.group || '',
         comment: client.comment || '',
@@ -477,6 +483,9 @@ export default function ClientFormModal({
       delayedDays: values.delayedDays,
       reset: values.reset,
       limitIp: values.limitIp,
+      upSpeedLimit: values.upSpeedLimit,
+      downSpeedLimit: values.downSpeedLimit,
+      sessionLimit: values.sessionLimit,
       tgId: values.tgId,
       group: values.group,
       comment: values.comment,
@@ -503,6 +512,9 @@ export default function ClientFormModal({
       expiryTime,
       reset: Number(values.reset) || 0,
       limitIp: Number(values.limitIp) || 0,
+      upSpeedLimit: SizeFormatter.speedMBpsToBytes(values.upSpeedLimit),
+      downSpeedLimit: SizeFormatter.speedMBpsToBytes(values.downSpeedLimit),
+      sessionLimit: normalizeSessionLimit(values.sessionLimit),
       tgId: Number(values.tgId) || 0,
       group: values.group,
       comment: values.comment,
@@ -661,6 +673,57 @@ export default function ClientFormModal({
                               </span>
                             </Tooltip>
                           </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={16}>
+                        <Col xs={24} md={8}>
+                          <FormField
+                            name="upSpeedLimit"
+                            label={t('pages.clients.upSpeedLimit')}
+                            tooltip={t('pages.clients.upSpeedLimitDesc')}
+                            transform={{ output: (v) => SizeFormatter.normalizeSpeedLimitMBps(Number(v)) }}
+                          >
+                            <InputNumber
+                              min={0}
+                              step={0.1}
+                              precision={1}
+                              style={{ width: '100%' }}
+                              onBlur={(e) => {
+                                const raw = (e.target as HTMLInputElement).value;
+                                methods.setValue('upSpeedLimit', SizeFormatter.parseSpeedLimitMBpsInput(raw));
+                              }}
+                            />
+                          </FormField>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <FormField
+                            name="downSpeedLimit"
+                            label={t('pages.clients.downSpeedLimit')}
+                            tooltip={t('pages.clients.downSpeedLimitDesc')}
+                            transform={{ output: (v) => SizeFormatter.normalizeSpeedLimitMBps(Number(v)) }}
+                          >
+                            <InputNumber
+                              min={0}
+                              step={0.1}
+                              precision={1}
+                              style={{ width: '100%' }}
+                              onBlur={(e) => {
+                                const raw = (e.target as HTMLInputElement).value;
+                                methods.setValue('downSpeedLimit', SizeFormatter.parseSpeedLimitMBpsInput(raw));
+                              }}
+                            />
+                          </FormField>
+                        </Col>
+                        <Col xs={24} md={8}>
+                          <FormField
+                            name="sessionLimit"
+                            label={t('pages.clients.sessionLimit')}
+                            tooltip={t('pages.clients.sessionLimitDesc')}
+                            transform={{ output: (v) => normalizeSessionLimit(Number(v)) }}
+                          >
+                            <InputNumber min={0} step={1} precision={0} style={{ width: '100%' }} />
+                          </FormField>
                         </Col>
                       </Row>
 

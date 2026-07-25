@@ -668,6 +668,56 @@ export class SizeFormatter {
   static speedFormat(bps: number | null | undefined): string {
     return SizeFormatter.sizeFormat(bps) + '/s';
   }
+
+  // Per-client speed-limit input handling. Speeds are entered in MB/s with one
+  // decimal place over [0, 1000] (0 = unlimited). Any out-of-range, non-finite,
+  // or higher-precision value normalizes to 0 so a bad input fails closed to
+  // "unlimited" rather than silently throttling a client to near-zero.
+  static normalizeSpeedLimitMBps(value: number | string | null | undefined): number {
+    const numberValue =
+      typeof value === 'string' ? Number(value.trim().replace(',', '.')) : Number(value);
+    if (!Number.isFinite(numberValue) || numberValue < 0 || numberValue > 1000) return 0;
+    const rounded = Math.round(numberValue * 10) / 10;
+    return Math.abs(numberValue - rounded) < Number.EPSILON ? rounded : 0;
+  }
+
+  // Parses a raw text input (from an InputNumber) into a normalized MB/s value.
+  // Accepts plain decimals with an optional comma decimal separator and at most
+  // one fractional digit; everything else resolves to 0.
+  static parseSpeedLimitMBpsInput(value: string | undefined): number {
+    const normalized = (value ?? '').trim().replace(',', '.');
+    if (!/^\d+(?:\.\d?)?$/.test(normalized)) return 0;
+    return SizeFormatter.normalizeSpeedLimitMBps(normalized);
+  }
+
+  // Converts a MB/s value to the bytes/s the server stores. Non-positive or
+  // invalid input becomes 0 (unlimited).
+  static speedMBpsToBytes(mbps: number | null | undefined): number {
+    const normalized = SizeFormatter.normalizeSpeedLimitMBps(mbps);
+    return normalized <= 0 ? 0 : Math.round(normalized * SizeFormatter.ONE_MB);
+  }
+
+  // Converts the stored bytes/s value back to MB/s for display, rounding to one
+  // decimal place. Non-positive values show as 0.
+  static speedBytesToMBps(bytes: number | null | undefined): number {
+    if (!bytes || !Number.isFinite(bytes) || bytes <= 0) return 0;
+    return Math.round((bytes / SizeFormatter.ONE_MB) * 10) / 10;
+  }
+
+  // Formats an MB/s value for display, keeping one decimal place. Used by the
+  // client list's speed-limit cell where the value is already in MB/s.
+  static speedMBpsFormat(mbps: number | null | undefined): string {
+    if (!mbps || !Number.isFinite(mbps) || mbps <= 0) return '0';
+    return (Math.round(mbps * 10) / 10).toString() + ' MB/s';
+  }
+}
+
+// Per-client session-limit input handling. Session limits are integer counts of
+// concurrent sessions over [0, 10000] (0 = unlimited). Any non-integer or
+// out-of-range value normalizes to 0 (fail closed to unlimited).
+export function normalizeSessionLimit(value: number | string | null | undefined): number {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 0 && n <= 10000 ? n : 0;
 }
 
 export class CPUFormatter {

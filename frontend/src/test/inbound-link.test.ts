@@ -413,12 +413,14 @@ describe('resolveAddr precedence', () => {
   });
 });
 
-// #4829: reaching the panel through an SSH tunnel (127.0.0.1/localhost) must not
-// leak the loopback host into share/QR links; a configured public host wins.
-describe('preferPublicHost (loopback fallback)', () => {
-  it('keeps a routable browser host as-is even when a public host is configured', () => {
-    expect(preferPublicHost('panel.example.com', 'sub.example.com')).toBe('panel.example.com');
-    expect(preferPublicHost('203.0.113.7', 'sub.example.com')).toBe('203.0.113.7');
+// The configured public host (Sub/Web Domain) is always preferred for share/QR
+// links, with the browser host kept only as a fallback. This matters when the
+// panel is managed over a private/internal address clients cannot reach.
+describe('preferPublicHost (public-first fallback)', () => {
+  it('prefers the configured public host over any browser host', () => {
+    // publicHost wins regardless of whether the browser host is routable.
+    expect(preferPublicHost('panel.example.com', 'sub.example.com')).toBe('sub.example.com');
+    expect(preferPublicHost('203.0.113.7', 'sub.example.com')).toBe('sub.example.com');
   });
 
   it('substitutes the public host for loopback browser hosts', () => {
@@ -427,12 +429,12 @@ describe('preferPublicHost (loopback fallback)', () => {
     }
   });
 
-  it('leaves loopback untouched when no public host is configured', () => {
+  it('trims a whitespace-only public host and falls back to the browser host', () => {
     expect(preferPublicHost('127.0.0.1', '')).toBe('127.0.0.1');
-    expect(preferPublicHost('localhost', '')).toBe('localhost');
+    expect(preferPublicHost('localhost', '   ')).toBe('localhost');
   });
 
-  it('an explicit per-inbound listen still wins over the loopback fallback', () => {
+  it('an explicit per-inbound listen still wins over the public-first fallback', () => {
     const inbound = { listen: '203.0.113.9', port: 443, protocol: 'vless' as const };
     expect(resolveAddr(
       inbound as never,

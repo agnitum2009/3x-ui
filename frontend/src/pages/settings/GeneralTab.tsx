@@ -165,7 +165,7 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
             </SettingListItem>
 
             <SettingListItem paddings="small" title={t('pages.settings.panelListeningDomain')} description={t('pages.settings.panelListeningDomainDesc')}>
-              <Input value={allSetting.webDomain} onChange={(e) => updateSetting({ webDomain: e.target.value })} />
+              <Input value={allSetting.webDomain} placeholder="panel.example.com" onChange={(e) => updateSetting({ webDomain: e.target.value })} />
             </SettingListItem>
 
             <SettingListItem paddings="small" title={t('pages.settings.panelPort')} description={t('pages.settings.panelPortDesc')}>

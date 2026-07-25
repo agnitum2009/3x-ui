@@ -939,6 +939,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "downSpeedLimit": {
+        "description": "Client download / server outbound limit in bytes/s; 0 means unlimited",
+        "format": "int64",
+        "type": "integer"
+      },
       "email": {
         "description": "Client email identifier",
         "type": "string"
@@ -1005,6 +1010,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "description": "Security method (e.g., \"auto\", \"aes-128-gcm\")",
         "type": "string"
       },
+      "sessionLimit": {
+        "description": "Concurrent session/connection limit; 0 means unlimited",
+        "type": "integer"
+      },
       "subId": {
         "description": "Subscription identifier",
         "type": "string"
@@ -1016,6 +1025,11 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "totalGB": {
         "description": "Total traffic limit in GB",
+        "format": "int64",
+        "type": "integer"
+      },
+      "upSpeedLimit": {
+        "description": "Client upload / server inbound limit in bytes/s; 0 means unlimited",
         "format": "int64",
         "type": "integer"
       },
@@ -1081,6 +1095,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "downSpeedLimit": {
+        "format": "int64",
+        "type": "integer"
+      },
       "email": {
         "type": "string"
       },
@@ -1128,6 +1146,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "security": {
         "type": "string"
       },
+      "sessionLimit": {
+        "type": "integer"
+      },
+      "speedLimit": {
+        "description": "SpeedLimit is the legacy downlink limit column. It mirrors DownSpeedLimit\n(with DownSpeedLimit falling back to the legacy value when it is 0) so the\nprojection stays compatible with unpatched cores that only read \"speedLimit\".",
+        "format": "int64",
+        "type": "integer"
+      },
       "subId": {
         "type": "string"
       },
@@ -1136,6 +1162,10 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "integer"
       },
       "totalGB": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "upSpeedLimit": {
         "format": "int64",
         "type": "integer"
       },
@@ -1153,6 +1183,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "auth",
       "comment",
       "createdAt",
+      "downSpeedLimit",
       "email",
       "enable",
       "expiryTime",
@@ -1169,9 +1200,12 @@ export const SCHEMAS: Record<string, unknown> = {
       "reverse",
       "secret",
       "security",
+      "sessionLimit",
+      "speedLimit",
       "subId",
       "tgId",
       "totalGB",
+      "upSpeedLimit",
       "updatedAt",
       "uuid"
     ],

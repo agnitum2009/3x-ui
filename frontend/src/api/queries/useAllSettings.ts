@@ -53,7 +53,10 @@ export function useAllSettings() {
       return HttpUtil.post('/panel/api/setting/update', body.success ? { ...payload, ...body.data } : payload);
     },
     onSuccess: (msg) => {
-      if (msg?.success) queryClient.invalidateQueries({ queryKey: keys.settings.all() });
+      // Invalidate the whole settings subtree: webDomain/subDomain changes
+      // reshape share/QR host resolution, so callers reading any settings query
+      // must refetch.
+      if (msg?.success) queryClient.invalidateQueries({ queryKey: keys.settings.root() });
     },
   });
 

@@ -916,6 +916,30 @@ export default function ClientsPage() {
       },
     },
     {
+      title: t('pages.clients.limits'),
+      key: 'limits',
+      width: 120,
+      align: 'center',
+      render: (_v, record) => {
+        const up = Number(record.upSpeedLimit) || 0;
+        const down = Number(record.downSpeedLimit) || 0;
+        const sessions = Number(record.sessionLimit) || 0;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+            <Tag color={up > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
+              {t('pages.clients.upSpeedLimitShort')}: {up > 0 ? SizeFormatter.speedMBpsFormat(up) : t('unlimited')}
+            </Tag>
+            <Tag color={down > 0 ? 'purple' : 'default'} style={{ margin: 0 }}>
+              {t('pages.clients.downSpeedLimitShort')}: {down > 0 ? SizeFormatter.speedMBpsFormat(down) : t('unlimited')}
+            </Tag>
+            <Tag color={sessions > 0 ? 'blue' : 'default'} style={{ margin: 0 }}>
+              {t('pages.clients.sessionLimitShort')}: {sessions > 0 ? sessions : t('unlimited')}
+            </Tag>
+          </div>
+        );
+      },
+    },
+    {
       title: t('pages.clients.remaining'),
       key: 'remaining',
       width: 130,

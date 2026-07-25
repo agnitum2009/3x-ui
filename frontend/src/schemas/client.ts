@@ -24,6 +24,9 @@ export const ClientRecordSchema = z.object({
   totalGB: z.number().optional(),
   expiryTime: z.number().optional(),
   limitIp: z.number().optional(),
+  upSpeedLimit: z.number().min(0).optional(),
+  downSpeedLimit: z.number().min(0).optional(),
+  sessionLimit: z.number().int().min(0).optional(),
   tgId: z.union([z.number(), z.string()]).optional(),
   group: z.string().optional(),
   comment: z.string().optional(),
@@ -180,6 +183,26 @@ export function hasForbiddenClientChars(value: string): boolean {
   return false;
 }
 
+// Speed limits are entered in MB/s (0..1000, one decimal place). 0 means
+// unlimited. The refine enforces the single-decimal constraint so the form
+// rejects inputs the server's fail-closed normalizer would otherwise clamp.
+const speedLimitMBps = z
+  .number()
+  .min(0, 'pages.clients.speedLimitInvalid')
+  .max(1000, 'pages.clients.speedLimitInvalid')
+  .refine(
+    (v) => Math.abs(v * 10 - Math.round(v * 10)) < Number.EPSILON * 10,
+    'pages.clients.speedLimitInvalid',
+  );
+
+// Session limit is an integer count of concurrent sessions (0..10000).
+// 0 means unlimited.
+const sessionLimitCount = z
+  .number()
+  .int('pages.clients.sessionLimitInvalid')
+  .min(0, 'pages.clients.sessionLimitInvalid')
+  .max(10000, 'pages.clients.sessionLimitInvalid');
+
 export const ClientFormSchema = z.object({
   email: z
     .string()
@@ -198,6 +221,9 @@ export const ClientFormSchema = z.object({
   delayedDays: z.number().int().min(0),
   reset: z.number().int().min(0),
   limitIp: z.number().int().min(0),
+  upSpeedLimit: speedLimitMBps,
+  downSpeedLimit: speedLimitMBps,
+  sessionLimit: sessionLimitCount,
   tgId: z.number().int().min(0),
   group: z.string(),
   comment: z.string(),
