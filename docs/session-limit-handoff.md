@@ -1,5 +1,13 @@
 # Handoff: Directional Speed Limits and Per-Client Session Limits
 
+> **Currency note (2026-07-25):** This handoff was refreshed after the v3.5.0
+> migration. The commit hashes, fork pin, and build steps below reflect the
+> current `custom/v3.5.0` branch (based on upstream 3x-ui **v3.5.0** and
+> Xray-core **v26.7.11**). For the full migration record see
+> `docs/v3.5.0-migration-note.md`; for a quick orientation see `HANDOFF.md` at
+> the repo root. Operational behavior (verified results, field semantics,
+> upgrade/rollback steps) is unchanged in spirit but the artifacts are newer.
+
 ## Scope
 
 This handoff covers the agnitum fork work that adds:
@@ -29,28 +37,30 @@ Repository:
 https://github.com/agnitum2009/Xray-core
 ```
 
-Required commit:
+Branch + required commit:
 
 ```text
-5f45a0be11a3e8e58436448a5081f000dbd79f81
+branch: custom/ag-v26.7.11
+commit: 747831e74ddc
 ```
 
-Commit title:
+This commit is a rebase of the original fork work onto upstream Xray-core
+**v26.7.11** (commit `50231eaff98c`). The original 0627-era commits
+(`5f45a0be11a3` etc.) are superseded — do not build from them.
 
-```text
-Keep session limits active for live links
-```
+Important implementation notes (8 files changed vs upstream v26.7.11):
 
-Important implementation notes:
-
-- `common/protocol/user.proto` includes `session_limit`.
+- `common/protocol/user.proto` appends `up_speed_limit = 6`,
+  `down_speed_limit = 7`, `session_limit = 8` (append-only, no renumbering).
 - `common/protocol/user.pb.go` is regenerated.
-- `common/protocol/user.go` round-trips `SessionLimit` in `MemoryUser`.
-- `common/protocol/user_json.go` accepts both `sessionLimit` and `session_limit`.
+- `common/protocol/user.go` round-trips SpeedLimit/UpSpeedLimit/DownSpeedLimit/SessionLimit in `MemoryUser`.
+- `common/protocol/user_json.go` parses `speedLimit`/`upSpeedLimit`/`downSpeedLimit`/`sessionLimit` (camelCase) from JSON user configs.
 - `app/dispatcher/default.go` enforces:
-  - speed limits through link readers/writers;
+  - per-direction speed limits through link readers/writers;
   - session limits before outbound dispatch;
   - session counter release on link writer close/error, not on request-context return.
+  - The only manual merge needed during the v26.7.11 rebase was here: upstream renamed `stats.GetOrRegisterCounter` from a free function to a stats-manager method; the fork's insertion points did not overlap with that rename.
+- Tests: `app/dispatcher/session_limit_test.go`, `common/protocol/user_json_test.go`, `common/protocol/user_session_json_test.go`.
 
 ### 3x-ui fork
 
@@ -60,22 +70,18 @@ Repository:
 https://github.com/agnitum2009/3x-ui
 ```
 
-Required commit:
+Branch + required commit:
 
 ```text
-f9323dd6d47849a45b16e78d9b1eb2c00b96d5e9
+branch: custom/v3.5.0
+commit: b508819d
 ```
 
-Commit title:
+This branch is based on upstream 3x-ui **v3.5.0** (`4e928a1c`) plus the 4
+migration commits. The `go.mod` replacement points at the v26.7.11-based fork:
 
 ```text
-Use fixed Xray session limiter
-```
-
-The `go.mod` replacement must point to the fixed Xray fork:
-
-```text
-replace github.com/xtls/xray-core => github.com/agnitum2009/Xray-core v0.0.0-20260708144011-5f45a0be11a3
+replace github.com/xtls/xray-core => github.com/agnitum2009/Xray-core v0.0.0-20260725032009-747831e74ddc
 ```
 
 ## Verified behavior
@@ -263,7 +269,7 @@ cd /opt/agnitum-build
 rm -rf Xray-core
 git clone https://github.com/agnitum2009/Xray-core.git
 cd Xray-core
-git checkout 5f45a0be11a3e8e58436448a5081f000dbd79f81
+git checkout custom/ag-v26.7.11   # commit 747831e74ddc, based on upstream v26.7.11
 
 GOPROXY=https://goproxy.cn,direct go build -o /opt/agnitum-build/xray-linux-$(case "$(uname -m)" in x86_64|amd64) echo amd64;; aarch64|arm64) echo arm64;; armv7*|armv7l) echo armv7;; armv6*) echo armv6;; i386|i686) echo 386;; *) uname -m;; esac) ./main
 ```
@@ -283,9 +289,10 @@ cd /opt/agnitum-build
 rm -rf 3x-ui
 git clone https://github.com/agnitum2009/3x-ui.git
 cd 3x-ui
-git checkout f9323dd6d47849a45b16e78d9b1eb2c00b96d5e9
+git checkout custom/v3.5.0   # commit b508819d, based on upstream v3.5.0
 
-grep 'github.com/agnitum2009/Xray-core v0.0.0-20260708144011-5f45a0be11a3' go.mod
+# Confirm the fork replace pin is present
+grep 'agnitum2009/Xray-core v0.0.0-20260725032009-747831e74ddc' go.mod
 
 npm --prefix frontend ci
 npm --prefix frontend run build
@@ -381,7 +388,9 @@ Check version:
 /usr/local/x-ui/bin/xray-linux-$ARCH version | head -3
 ```
 
-The version line may still show `26.6.27`; that is expected. The important part is that the binary was built from `agnitum2009/Xray-core` commit `5f45a0be11a3e8e58436448a5081f000dbd79f81`.
+The version line should report **`Xray 26.7.11`** (the upstream base of this
+fork). The important part is that the binary was built from
+`agnitum2009/Xray-core` branch `custom/ag-v26.7.11` (commit `747831e74ddc`).
 
 ### 9. Verify generated Xray config includes limits
 
@@ -467,8 +476,30 @@ systemctl start x-ui 2>/dev/null || service x-ui start
 - Session counters must remain active until the proxied link closes or errors.
 - If a release artifact is created later, update this handoff to replace the source-build upgrade path with release-download commands.
 
+### v3.5.0-specific constraints (added during the migration)
+
+- **React Hook Form**: `ClientFormModal.tsx` migrated to RHF in v3.5.0. New
+  form fields must go through `<FormField>` and be added to both the
+  `safeParse` whitelist and the `clientPayload` whitelist in `onSubmit`.
+- **0-value persistence**: clearing a limit (set to 0 = unlimited) over a
+  previously-set value requires `UpdateColumns` (see `client_crud.go Update`);
+  a plain save will not write the zero.
+- **Downlink fallback consistency**: the `DownSpeedLimit == 0 → use SpeedLimit`
+  fallback is applied in 5 places (model helper, xray.go, api.go AddUser,
+  client_crud Update, frontend edit-load). Keep them in sync.
+- **protobuf append-only**: fork proto field numbers 6/7/8 must never be
+  renumbered, or wire compatibility with deployed cores breaks.
+- **Generated artifacts**: after any Go model change that surfaces in the API,
+  run `npm run gen` (regenerates `openapi.json` + `src/generated/*`) before
+  `npm run build`. Never hand-merge those files.
+
 ## Known gaps
 
 - No official GitHub release artifact exists yet for the agnitum fork build.
 - The 100-concurrency sample used an external Cloudflare endpoint, so network variance affected completion count.
 - Full `infra/conf` Xray test package was not run because this checkout lacks `resources/geoip.dat`; targeted VLESS config tests were run instead.
+- The v3.5.0 upgrade guide above was written from the v3.4.2 guide and updated
+  for the new commit/pin values, but has **not been re-run end-to-end on a live
+  server** since the v3.5.0 migration. The panel built and tested cleanly in
+  CI (go build/test, npm build/test all green), but a production smoke test is
+  still recommended before deploying.
